@@ -1,5 +1,4 @@
-// import { usersModel } from "../../../DB/models/Users.model.js";
-import usersModel from "../../../DB/models/Users.model.js";
+import { userModel } from "../../../DB/models/User.model.js";
 import bcrypt from "bcrypt";
 import { sendError } from "../../lib/sendError.js";
 import JWT from "jsonwebtoken";
@@ -7,7 +6,7 @@ import JWT from "jsonwebtoken";
 export const createNewUser = async (req, res, next) => {
   const { userName, email, contactNumber, password } = req.body;
 
-  const userExist = await usersModel.findOne({ email });
+  const userExist = await userModel.findOne({ email });
 
   if (userExist) return sendError(next, "Email alerady exist please add another email", 400);
 
@@ -15,7 +14,7 @@ export const createNewUser = async (req, res, next) => {
 
   if (!hashPassword) return sendError(next, "Error hashing password", 400);
 
-  const data = await usersModel.create({ userName, email, contactNumber, password: hashPassword });
+  const data = await userModel.create({ userName, email, contactNumber, password: hashPassword });
 
   res.status(201).json({
     message: "New user created successfully",
@@ -29,7 +28,7 @@ export const createNewUser = async (req, res, next) => {
 export const signIn = async (req, res, next) => {
   const { email, password } = req.body;
 
-  const userData = await usersModel.findOne({ email });
+  const userData = await userModel.findOne({ email });
 
   if (!userData) return sendError(next, "Email or password not correct!", 400);
 
@@ -64,7 +63,7 @@ export const refreshToken = async (req, res, next) => {
   JWT.verify(refreshToken, process.env.REFRESH_TOKE_SECRET, async (err, data) => {
     if (err || !data._id || !data.email) return sendError(next, "Unauthorized!", 401);
 
-    const userData = await usersModel.findOne({ email: data.email });
+    const userData = await userModel.findOne({ email: data.email });
 
     if (!userData) return sendError(next, "User not found!", 400);
 

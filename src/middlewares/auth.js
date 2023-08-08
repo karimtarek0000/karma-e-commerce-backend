@@ -1,6 +1,6 @@
 import JWT from "jsonwebtoken";
 import { sendError } from "../lib/sendError.js";
-import usersModel from "../../DB/models/Users.model.js";
+import { userModel } from "../../DB/models/User.model.js";
 
 export const auth = async (req, res, next) => {
   const accessToken = req.header("Authorization");
@@ -15,7 +15,7 @@ export const auth = async (req, res, next) => {
     });
 
     if (userDataFromToken) {
-      const userData = await usersModel.findOne({ email: userDataFromToken.email });
+      const userData = await userModel.findOne({ email: userDataFromToken.email });
 
       if (!userData) return sendError(next, "This user not exist!", 400);
 
