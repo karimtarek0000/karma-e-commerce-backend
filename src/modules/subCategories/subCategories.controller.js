@@ -1,12 +1,12 @@
+import slugify from "slugify";
+import { nanoid } from "nanoid";
 import { subCategoryModel } from "../../../DB/models/SubCategory.model.js";
 import { categoryModel } from "../../../DB/models/Category.model.js";
 import cloudinary from "../../lib/cloudinary.cloud.js";
 import { sendError } from "../../lib/sendError.js";
-import slugify from "slugify";
-import { nanoid } from "nanoid";
 
 export const createNewSubCategory = async (req, res, next) => {
-  const file = req.file;
+  const { file } = req;
   const { name, categoryId } = req.body;
 
   const categoryIdExist = await categoryModel.findById(categoryId);
@@ -44,7 +44,7 @@ export const createNewSubCategory = async (req, res, next) => {
 };
 
 export const updateSubCategory = async (req, res, next) => {
-  const file = req.file;
+  const { file } = req;
   const { id, name } = req.body;
 
   if (!name && !file) return sendError(next, "No any data found to update", 400);
@@ -58,8 +58,9 @@ export const updateSubCategory = async (req, res, next) => {
   if (name) {
     // Check if new name unique or not
     const categoryExistWithNewName = await subCategoryModel.findOne({ name });
-    if (categoryExistWithNewName)
+    if (categoryExistWithNewName) {
       return sendError(next, "This sub category name alerady exist", 400);
+    }
 
     const slug = slugify(name, "_");
 
