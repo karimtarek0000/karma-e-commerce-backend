@@ -1,4 +1,5 @@
-import { usersModel } from "../../../DB/models/Users.model.js";
+// import { usersModel } from "../../../DB/models/Users.model.js";
+import usersModel from "../../../DB/models/Users.model.js";
 import bcrypt from "bcrypt";
 import { sendError } from "../../lib/sendError.js";
 import JWT from "jsonwebtoken";

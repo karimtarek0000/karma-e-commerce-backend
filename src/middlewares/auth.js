@@ -1,6 +1,6 @@
 import JWT from "jsonwebtoken";
 import { sendError } from "../lib/sendError.js";
-import { usersModel } from "../../DB/models/Users.model.js";
+import usersModel from "../../DB/models/Users.model.js";
 
 export const auth = async (req, res, next) => {
   const accessToken = req.header("Authorization");
