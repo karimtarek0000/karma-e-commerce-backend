@@ -2,7 +2,7 @@ import cookieParser from "cookie-parser";
 import { dbConnection } from "../../DB/connection.js";
 
 // Routes
-import { usersRoutes } from "./routes.all.js";
+import { usersRoutes, categoriesRoutes } from "./routes.all.js";
 
 export function initialProject(app) {
   // Middleware for cookies parsing
@@ -12,6 +12,7 @@ export function initialProject(app) {
   dbConnection();
 
   // Routes endpoints
+  app.use("/categories", categoriesRoutes);
   app.use("/users", usersRoutes);
 
   // 404 ( Not Found )
@@ -23,7 +24,5 @@ export function initialProject(app) {
   });
 
   // Server connection
-  app.listen(+process.env.PORT, () => {
-    console.log("Server listening on port 3000");
-  });
+  app.listen(+process.env.PORT, () => console.log("Server listening on port 3000"));
 }
