@@ -7,17 +7,18 @@ import { uploadFilesWithCloud, allowExtensionsTypes } from "../../services/uploa
 
 const router = Router();
 
-router.post(
-  "/",
-  uploadFilesWithCloud(allowExtensionsTypes.image).single("category", 1),
-  validationCore(categorySchema),
-  errorHandler(createNewCategory)
-);
-router.patch(
-  "/",
-  uploadFilesWithCloud(allowExtensionsTypes.image).single("category", 1),
-  validationCore(updateCategorySchema),
-  errorHandler(updateCategory)
-);
+router
+  .post(
+    "/",
+    uploadFilesWithCloud(allowExtensionsTypes.image).single("category", 1),
+    validationCore(categorySchema),
+    errorHandler(createNewCategory)
+  )
+  .patch(
+    "/",
+    uploadFilesWithCloud(allowExtensionsTypes.image).single("category", 1),
+    validationCore(updateCategorySchema),
+    errorHandler(updateCategory)
+  );
 
 export default router;

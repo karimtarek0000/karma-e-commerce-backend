@@ -2,7 +2,7 @@ import cookieParser from "cookie-parser";
 import { dbConnection } from "../../DB/connection.js";
 
 // Routes
-import { usersRoutes, categoriesRoutes } from "./routes.all.js";
+import { usersRoutes, categoriesRoutes, subCategoriesRoutes } from "./routes.all.js";
 
 export function initialProject(app) {
   // Middleware for cookies parsing
@@ -12,6 +12,7 @@ export function initialProject(app) {
   dbConnection();
 
   // Routes endpoints
+  app.use("/sub-categories", subCategoriesRoutes);
   app.use("/categories", categoriesRoutes);
   app.use("/users", usersRoutes);
 

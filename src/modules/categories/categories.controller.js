@@ -51,7 +51,7 @@ export const updateCategory = async (req, res, next) => {
   if (name) {
     // Check if new name unique or not
     const categoryExistWithNewName = await categoryModel.findOne({ name });
-    if (categoryExistWithNewName) return sendError(next, "This name alerady exist", 400);
+    if (categoryExistWithNewName) return sendError(next, "This category name alerady exist", 400);
 
     const slug = slugify(name, "_");
 
@@ -73,5 +73,5 @@ export const updateCategory = async (req, res, next) => {
   }
 
   const categoryData = await category.save();
-  res.status(201).json({ message: "Create category successfully", category: categoryData });
+  res.status(201).json({ message: "Update category successfully", category: categoryData });
 };
