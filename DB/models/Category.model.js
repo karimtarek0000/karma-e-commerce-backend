@@ -3,12 +3,13 @@ import mongoose, { Schema } from "mongoose";
 const category = new Schema(
   {
     name: {
-      type: string,
+      type: String,
       unique: true,
       lowercase: true,
     },
     slug: {
       type: String,
+      lowercase: true,
       required: true,
     },
     customId: {
@@ -17,11 +18,11 @@ const category = new Schema(
       required: true,
     },
     image: {
-      publicId: {
+      public_id: {
         type: String,
         required: true,
       },
-      secureId: {
+      secure_url: {
         type: String,
         required: true,
       },
