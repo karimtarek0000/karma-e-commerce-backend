@@ -29,6 +29,7 @@ const category = new Schema(
     },
     createdBy: {
       type: Schema.Types.ObjectId,
+      ref: "user",
       required: false,
     },
   },

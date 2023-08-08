@@ -29,10 +29,12 @@ const subCategory = new Schema(
     },
     categoryId: {
       type: Schema.Types.ObjectId,
-      required: false,
+      ref: "category",
+      required: true,
     },
     createdBy: {
       type: Schema.Types.ObjectId,
+      ref: "user",
       required: false,
     },
   },

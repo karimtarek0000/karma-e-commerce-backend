@@ -7,6 +7,7 @@ const share = {
 
 export const subCategorySchema = {
   body: JOI.object({
+    categoryId: JOI.string().trim(),
     ...share,
   }).options({ presence: "required" }),
   file: JOI.object().required(),

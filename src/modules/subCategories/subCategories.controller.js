@@ -1,4 +1,5 @@
 import { subCategoryModel } from "../../../DB/models/SubCategory.model.js";
+import { categoryModel } from "../../../DB/models/Category.model.js";
 import cloudinary from "../../lib/cloudinary.cloud.js";
 import { sendError } from "../../lib/sendError.js";
 import slugify from "slugify";
@@ -6,7 +7,11 @@ import { nanoid } from "nanoid";
 
 export const createNewSubCategory = async (req, res, next) => {
   const file = req.file;
-  const { name } = req.body;
+  const { name, categoryId } = req.body;
+
+  const categoryIdExist = await categoryModel.findById(categoryId);
+
+  if (!categoryIdExist) return sendError(next, "No there any category with this id", 400);
 
   const subCategoryNameExist = await subCategoryModel.findOne({ name });
 
@@ -24,6 +29,7 @@ export const createNewSubCategory = async (req, res, next) => {
     slug,
     customId,
     image: { public_id, secure_url },
+    categoryId: categoryIdExist._id,
   });
 
   // If data not created in database will remove image
