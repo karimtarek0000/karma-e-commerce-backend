@@ -1,9 +1,9 @@
-import slugify from "slugify";
-import { nanoid } from "nanoid";
-import { subCategoryModel } from "../../../DB/models/SubCategory.model.js";
-import { categoryModel } from "../../../DB/models/Category.model.js";
-import cloudinary from "../../lib/cloudinary.cloud.js";
-import { sendError } from "../../lib/sendError.js";
+import slugify from 'slugify';
+import { nanoid } from 'nanoid';
+import { subCategoryModel } from '../../../DB/models/SubCategory.model.js';
+import { categoryModel } from '../../../DB/models/Category.model.js';
+import cloudinary from '../../lib/cloudinary.cloud.js';
+import { sendError } from '../../lib/sendError.js';
 
 export const createNewSubCategory = async (req, res, next) => {
   const { file } = req;
@@ -11,19 +11,26 @@ export const createNewSubCategory = async (req, res, next) => {
 
   const categoryIdExist = await categoryModel.findById(categoryId);
 
-  if (!categoryIdExist) return sendError(next, "No there any category with this id", 400);
+  if (!categoryIdExist) {
+    return sendError(next, 'No there any category with this id', 400);
+  }
 
   const subCategoryNameExist = await subCategoryModel.findOne({ name });
 
-  if (subCategoryNameExist) return sendError(next, "Name sub category already exist!", 400);
+  if (subCategoryNameExist) {
+    return sendError(next, 'Name sub category already exist!', 400);
+  }
 
   const customId = nanoid(20);
 
-  const { public_id, secure_url } = await cloudinary.uploader.upload(file.path, {
-    folder: `karma-e-commerce/sub-categories/${customId}`,
-  });
+  const { public_id, secure_url } = await cloudinary.uploader.upload(
+    file.path,
+    {
+      folder: `${process.env.FOLDER_NAME}/categories/${categoryIdExist.customId}/subCategories/${customId}`,
+    }
+  );
 
-  const slug = slugify(name, "_");
+  const slug = slugify(name, '_');
   const subCategoryData = await subCategoryModel.create({
     name,
     slug,
@@ -35,34 +42,43 @@ export const createNewSubCategory = async (req, res, next) => {
   // If data not created in database will remove image
   if (!subCategoryData) {
     await cloudinary.uploader.destroy(public_id);
-    return sendError(next, "Error happend when create data please try again!", 400);
+    return sendError(
+      next,
+      'Error happend when create data please try again!',
+      400
+    );
   }
 
-  res
-    .status(201)
-    .json({ message: "Create sub category successfully", subCategory: subCategoryData });
+  res.status(201).json({
+    message: 'Create sub category successfully',
+    subCategory: subCategoryData,
+  });
 };
 
 export const updateSubCategory = async (req, res, next) => {
   const { file } = req;
   const { id, name } = req.body;
 
-  if (!name && !file) return sendError(next, "No any data found to update", 400);
+  if (!name && !file) {
+    return sendError(next, 'No any data found to update', 400);
+  }
 
   const subCategory = await subCategoryModel.findById(id);
 
   // Check if category id exist or not
-  if (!subCategory) return sendError(next, "No category found with this id", 400);
+  if (!subCategory) {
+    return sendError(next, 'No category found with this id', 400);
+  }
 
   // If name exist
   if (name) {
     // Check if new name unique or not
     const categoryExistWithNewName = await subCategoryModel.findOne({ name });
     if (categoryExistWithNewName) {
-      return sendError(next, "This sub category name alerady exist", 400);
+      return sendError(next, 'This sub category name alerady exist', 400);
     }
 
-    const slug = slugify(name, "_");
+    const slug = slugify(name, '_');
 
     subCategory.name = name;
     subCategory.slug = slug;
@@ -74,15 +90,19 @@ export const updateSubCategory = async (req, res, next) => {
     await cloudinary.uploader.destroy(subCategory.image.public_id);
 
     // Upload new image
-    const { public_id, secure_url } = await cloudinary.uploader.upload(file.path, {
-      folder: `karma-e-commerce/sub-categories/${subCategory.customId}`,
-    });
+    const { public_id, secure_url } = await cloudinary.uploader.upload(
+      file.path,
+      {
+        folder: `${process.env.FOLDER_NAME}/sub-categories/${subCategory.customId}`,
+      }
+    );
 
     subCategory.image = { public_id, secure_url };
   }
 
   const subCategoryData = await subCategory.save();
-  res
-    .status(201)
-    .json({ message: "Update sub category successfully", subCategory: subCategoryData });
+  res.status(201).json({
+    message: 'Update sub category successfully',
+    subCategory: subCategoryData,
+  });
 };

@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema } from 'mongoose';
 
 const category = new Schema(
   {
@@ -29,13 +29,21 @@ const category = new Schema(
     },
     createdBy: {
       type: Schema.Types.ObjectId,
-      ref: "user",
+      ref: 'user',
       required: false,
     },
   },
   {
     timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
 
-export const categoryModel = mongoose.model("category", category);
+category.virtual('subCategories', {
+  ref: 'subcategory',
+  foreignField: 'categoryId',
+  localField: '_id',
+});
+
+export const categoryModel = mongoose.model('category', category);

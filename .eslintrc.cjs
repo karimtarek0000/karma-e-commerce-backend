@@ -27,5 +27,7 @@ module.exports = {
     'no-underscore-dangle': ['off'],
     'implicit-arrow-linebreak': ['off'],
     'function-paren-newline': ['off'],
+    'import/prefer-default-export': ['off'],
+    camelcase: ['off'],
   },
 };

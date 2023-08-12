@@ -1,10 +1,9 @@
 import mongoose, { Schema } from 'mongoose';
 
-const subCategory = new Schema(
+const brand = new Schema(
   {
     name: {
       type: String,
-      unique: true,
       lowercase: true,
     },
     slug: {
@@ -27,15 +26,20 @@ const subCategory = new Schema(
         required: true,
       },
     },
+    createdBy: {
+      type: Schema.Types.ObjectId,
+      ref: 'user',
+      required: false,
+    },
     categoryId: {
       type: Schema.Types.ObjectId,
       ref: 'category',
       required: true,
     },
-    createdBy: {
+    subCategoryId: {
       type: Schema.Types.ObjectId,
-      ref: 'user',
-      required: false,
+      ref: 'subcategory',
+      required: true,
     },
   },
   {
@@ -43,4 +47,4 @@ const subCategory = new Schema(
   }
 );
 
-export const subCategoryModel = mongoose.model('subcategory', subCategory);
+export const brandModel = mongoose.model('brand', brand);

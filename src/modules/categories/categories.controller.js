@@ -1,9 +1,8 @@
-import slugify from 'slugify';
 import { nanoid } from 'nanoid';
+import slugify from 'slugify';
 import { categoryModel } from '../../../DB/models/Category.model.js';
 import cloudinary from '../../lib/cloudinary.cloud.js';
 import { sendError } from '../../lib/sendError.js';
-import { subCategoryModel } from '../../../DB/models/SubCategory.model.js';
 
 export const createNewCategory = async (req, res, next) => {
   const { file } = req;
@@ -20,7 +19,7 @@ export const createNewCategory = async (req, res, next) => {
   const { public_id, secure_url } = await cloudinary.uploader.upload(
     file.path,
     {
-      folder: `karma-e-commerce/categories/${customId}`,
+      folder: `${process.env.FOLDER_NAME}/categories/${customId}`,
     }
   );
 
@@ -84,7 +83,7 @@ export const updateCategory = async (req, res, next) => {
     const { public_id, secure_url } = await cloudinary.uploader.upload(
       file.path,
       {
-        folder: `karma-e-commerce/categories/${category.customId}`,
+        folder: `${process.env.FOLDER_NAME}/categories/${category.customId}`,
       }
     );
 
@@ -97,20 +96,12 @@ export const updateCategory = async (req, res, next) => {
     .json({ message: 'Update category successfully', category: categoryData });
 };
 
-export const getCategories = async (req, res) => {
-  const allCategories = [];
+export const getCategories = async (req, res, next) => {
+  const categories = await categoryModel
+    .find()
+    .populate([{ path: 'subCategories' }]);
 
-  const cursor = categoryModel.find().cursor();
-
-  // eslint-disable-next-line no-await-in-loop
-  for (let doc = await cursor.next(); doc != null; doc = await cursor.next()) {
-    // eslint-disable-next-line no-await-in-loop
-    const subCategory = await subCategoryModel.find({ categoryId: doc._id });
-
-    const category = doc.toObject();
-    category.subCategories = subCategory;
-    allCategories.push(category);
-  }
-
-  res.status(200).json({ message: 'done', allCategories });
+  res
+    .status(200)
+    .json({ message: 'All categories and sub categories', categories });
 };
