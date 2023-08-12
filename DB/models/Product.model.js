@@ -38,6 +38,9 @@ const product = new Schema(
     colors: {
       type: [String],
     },
+    sizes: {
+      type: [String],
+    },
     images: [
       {
         public_id: {

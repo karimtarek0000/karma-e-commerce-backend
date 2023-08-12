@@ -19,6 +19,8 @@ export const addNewProduct = async (req, res, next) => {
     categoryId,
     subCategoryId,
     brandId,
+    colors,
+    sizes,
   } = req.body;
 
   const categoryExist = await categoryModel.findById(categoryId);
@@ -34,7 +36,9 @@ export const addNewProduct = async (req, res, next) => {
   // Upload images
   const images = [];
   const publicIds = [];
-  async function sendProductImage(file) {
+
+  for (const file of files) {
+    // eslint-disable-next-line no-await-in-loop
     const { public_id, secure_url } = await cloudinary.uploader.upload(
       file.path,
       {
@@ -46,12 +50,11 @@ export const addNewProduct = async (req, res, next) => {
     publicIds.push(public_id);
   }
 
-  for (const file of files) {
-    sendProductImage(file);
-  }
-
   // Save all data in database
-  const priceAfterDiscount = discount ? price - (price * discount) / 100 : 0;
+  const priceAfterDiscount = discount
+    ? price - (price * discount) / 100
+    : price;
+
   const slug = slugify(title, '_');
 
   const product = await productModel.create({
@@ -67,11 +70,13 @@ export const addNewProduct = async (req, res, next) => {
     brandId,
     customId,
     images,
+    colors,
+    sizes,
   });
 
   if (!product) {
     await cloudinary.api.delete_resources(publicIds);
-    return sendError(next, 'Error happend while save data please try again');
+    return sendError(next, 'Error happend while save data, please try again');
   }
 
   res.status(201).json({ message: 'Create new product', product });

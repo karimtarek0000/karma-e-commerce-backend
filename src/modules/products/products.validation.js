@@ -8,8 +8,10 @@ export const productSchema = {
     categoryId: JOI.string().required(),
     subCategoryId: JOI.string().required(),
     brandId: JOI.string().required(),
-    discount: JOI.number(),
     stock: JOI.number().required(),
+    discount: JOI.number(),
+    colors: JOI.array().items(JOI.string().trim()),
+    sizes: JOI.array().items(JOI.string().trim()),
   }),
   files: JOI.array().min(1).required(),
 };
