@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { errorHandler } from '../../lib/errorHandler.js';
 import {
   createNewSubCategory,
+  deleteSubCategory,
   updateSubCategory,
   // eslint-disable-next-line import/extensions
 } from './subCategories.controller.js';
@@ -29,6 +30,7 @@ router
     uploadFilesWithCloud(allowExtensionsTypes.image).single('subCategory', 1),
     validationCore(updateSubCategorySchema),
     errorHandler(updateSubCategory)
-  );
+  )
+  .delete('/:subCategoryId', errorHandler(deleteSubCategory));
 
 export default router;

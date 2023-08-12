@@ -43,3 +43,9 @@ export const addNewBrand = async (req, res, next) => {
 
   res.status(201).json({ message: 'Create new brand', brand });
 };
+
+export const deleteBrand = (req, res, next) => {
+  // First check if id brand valid or not and after that delete brand
+  // sendError(next, 'Error happend please try again', 400);
+  // res.status(200).json({ message: 'Delete brand' });
+};

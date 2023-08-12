@@ -4,6 +4,7 @@ import { subCategoryModel } from '../../../DB/models/SubCategory.model.js';
 import { categoryModel } from '../../../DB/models/Category.model.js';
 import cloudinary from '../../lib/cloudinary.cloud.js';
 import { sendError } from '../../lib/sendError.js';
+import { brandModel } from '../../../DB/models/Brand.model.js';
 
 export const createNewSubCategory = async (req, res, next) => {
   const { file } = req;
@@ -59,11 +60,13 @@ export const updateSubCategory = async (req, res, next) => {
   const { file } = req;
   const { id, name } = req.body;
 
-  if (!name && !file) {
+  if (!name || !file) {
     return sendError(next, 'No any data found to update', 400);
   }
 
-  const subCategory = await subCategoryModel.findById(id);
+  const subCategory = await subCategoryModel
+    .findById(id)
+    .populate([{ path: 'categoryId' }]);
 
   // Check if category id exist or not
   if (!subCategory) {
@@ -93,7 +96,7 @@ export const updateSubCategory = async (req, res, next) => {
     const { public_id, secure_url } = await cloudinary.uploader.upload(
       file.path,
       {
-        folder: `${process.env.FOLDER_NAME}/sub-categories/${subCategory.customId}`,
+        folder: `${process.env.FOLDER_NAME}/categories/${subCategory.categoryId.customId}/subCategories/${subCategory.customId}`,
       }
     );
 
@@ -105,4 +108,38 @@ export const updateSubCategory = async (req, res, next) => {
     message: 'Update sub category successfully',
     subCategory: subCategoryData,
   });
+};
+
+export const deleteSubCategory = async (req, res, next) => {
+  const { subCategoryId } = req.params;
+
+  const subCategory = await subCategoryModel
+    .findById(subCategoryId)
+    .populate([{ path: 'categoryId' }]);
+
+  if (!subCategory) return sendError(next, 'Subcategory id not correct', 400);
+
+  const [subcategory, brand] = await Promise.all([
+    subCategoryModel.deleteOne({ _id: subCategoryId }),
+    brandModel.deleteMany({
+      subCategoryId,
+    }),
+  ]);
+
+  if (!subcategory || !brand.deletedCount) {
+    return sendError(
+      next,
+      'Error happend while delete subcategory and brand',
+      400
+    );
+  }
+
+  // Delete images with folders
+  const path = `${process.env.FOLDER_NAME}/categories/${subCategory.categoryId.customId}/subCategories/${subCategory.customId}`;
+  await cloudinary.api.delete_resources_by_prefix(path);
+  await cloudinary.api.delete_folder(path);
+
+  res
+    .status(200)
+    .json({ message: 'Delete subcategory successfully', status: true });
 };

@@ -3,6 +3,8 @@ import slugify from 'slugify';
 import { categoryModel } from '../../../DB/models/Category.model.js';
 import cloudinary from '../../lib/cloudinary.cloud.js';
 import { sendError } from '../../lib/sendError.js';
+import { subCategoryModel } from '../../../DB/models/SubCategory.model.js';
+import { brandModel } from '../../../DB/models/Brand.model.js';
 
 export const createNewCategory = async (req, res, next) => {
   const { file } = req;
@@ -96,10 +98,45 @@ export const updateCategory = async (req, res, next) => {
     .json({ message: 'Update category successfully', category: categoryData });
 };
 
-export const getCategories = async (req, res, next) => {
-  const categories = await categoryModel
-    .find()
-    .populate([{ path: 'subCategories' }]);
+export const deleteCategory = async (req, res, next) => {
+  const { categoryId } = req.params;
+
+  const category = await categoryModel.findByIdAndDelete(categoryId);
+
+  if (!category) return sendError(next, 'Category id not correct!', 400);
+
+  // Delete subcategory and brand
+  const [subCategory, brand] = await Promise.all([
+    subCategoryModel.deleteMany({ categoryId }),
+    brandModel.deleteMany({ categoryId }),
+  ]);
+
+  if (!subCategory.deletedCount && !brand.deletedCount) {
+    return sendError(
+      next,
+      'Error happend while delete subcategory and brand please try again',
+      400
+    );
+  }
+
+  // Delete all in folder customId into categories folder and after that delete folder
+  const path = `${process.env.FOLDER_NAME}/categories/${category.customId}`;
+
+  await cloudinary.api.delete_resources_by_prefix(path);
+  await cloudinary.api.delete_folder(path);
+
+  res
+    .status(200)
+    .json({ message: 'Delete category successfully', status: true });
+};
+
+export const getCategories = async (req, res) => {
+  const categories = await categoryModel.find().populate([
+    {
+      path: 'subCategories',
+      populate: [{ path: 'brands' }],
+    },
+  ]);
 
   res
     .status(200)

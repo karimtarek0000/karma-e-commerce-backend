@@ -40,7 +40,15 @@ const subCategory = new Schema(
   },
   {
     timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
+
+subCategory.virtual('brands', {
+  ref: 'brand',
+  foreignField: 'subCategoryId',
+  localField: '_id',
+});
 
 export const subCategoryModel = mongoose.model('subcategory', subCategory);
