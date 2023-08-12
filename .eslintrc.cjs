@@ -29,5 +29,6 @@ module.exports = {
     'function-paren-newline': ['off'],
     'import/prefer-default-export': ['off'],
     camelcase: ['off'],
+    'no-restricted-syntax': ['off'],
   },
 };
