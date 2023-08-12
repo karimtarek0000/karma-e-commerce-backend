@@ -7,11 +7,11 @@ import { sendError } from '../../lib/sendError.js';
 import { brandModel } from '../../../DB/models/Brand.model.js';
 
 export const addNewBrand = async (req, res, next) => {
-  const { file } = req.file;
+  const { file } = req;
   const { name, categoryId, subCategoryId } = req.body;
 
   const category = await categoryModel.findById(categoryId);
-  const subCategory = subCategoryModel.findById(subCategoryId);
+  const subCategory = await subCategoryModel.findById(subCategoryId);
 
   if (!category || !subCategory) {
     return sendError(next, 'CategoryId or SubCategoryId not valid', 400);
@@ -32,6 +32,7 @@ export const addNewBrand = async (req, res, next) => {
     slug,
     categoryId,
     subCategoryId,
+    customId,
     image: { public_id, secure_url },
   });
 
@@ -40,5 +41,5 @@ export const addNewBrand = async (req, res, next) => {
     return sendError(next, 'Error happend please try again', 400);
   }
 
-  res.status(201).json('Create new brand', brand);
+  res.status(201).json({ message: 'Create new brand', brand });
 };

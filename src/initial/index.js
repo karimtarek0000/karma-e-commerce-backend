@@ -6,6 +6,7 @@ import {
   usersRoutes,
   categoriesRoutes,
   subCategoriesRoutes,
+  brandsRoutes,
 } from './routes.all.js';
 
 export default function initialProject(app) {
@@ -16,8 +17,9 @@ export default function initialProject(app) {
   dbConnection();
 
   // Routes endpoints
-  app.use('/sub-categories', subCategoriesRoutes);
   app.use('/categories', categoriesRoutes);
+  app.use('/sub-categories', subCategoriesRoutes);
+  app.use('/brands', brandsRoutes);
   app.use('/users', usersRoutes);
 
   // 404 ( Not Found )

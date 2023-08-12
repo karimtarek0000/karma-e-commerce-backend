@@ -1,22 +1,26 @@
 import { Router } from 'express';
 import { errorHandler } from '../../lib/errorHandler.js';
-import {
-  createNewCategory,
-  getCategories,
-  updateCategory,
-} from './categories.controller.js';
 import { validationCore } from '../../middlewares/validations.js';
 import {
-  categorySchema,
-  updateCategorySchema,
-} from './categories.validation.js';
-import {
-  uploadFilesWithCloud,
   allowExtensionsTypes,
+  uploadFilesWithCloud,
 } from '../../services/uploadFiles.cloud.js';
+import { addNewBrand } from './brands.controller.js';
+import { brandSchema } from './brands.validation.js';
 
 const router = Router();
 
-router.post('/');
+router.post(
+  '/',
+  uploadFilesWithCloud(allowExtensionsTypes.image).single('brand', 1),
+  validationCore(brandSchema),
+  errorHandler(addNewBrand)
+);
+// .patch(
+//   '/',
+//   uploadFilesWithCloud(allowExtensionsTypes.image).single('category', 1),
+//   validationCore(updateCategorySchema),
+//   errorHandler(updateCategory)
+// );
 
 export default router;
