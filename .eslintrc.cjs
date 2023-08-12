@@ -23,5 +23,9 @@ module.exports = {
     quotes: ['error', 'single'],
     'import/extensions': ['error', 'always'],
     'comma-dangle': ['off'],
+    'consistent-return': ['off'],
+    'no-underscore-dangle': ['off'],
+    'implicit-arrow-linebreak': ['off'],
+    'function-paren-newline': ['off'],
   },
 };
