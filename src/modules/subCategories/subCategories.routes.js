@@ -3,6 +3,7 @@ import { errorHandler } from '../../lib/errorHandler.js';
 import {
   createNewSubCategory,
   deleteSubCategory,
+  getAllSubCategories,
   updateSubCategory,
   // eslint-disable-next-line import/extensions
 } from './subCategories.controller.js';
@@ -19,6 +20,7 @@ import {
 const router = Router();
 
 router
+  .get('/', errorHandler(getAllSubCategories))
   .post(
     '/',
     uploadFilesWithCloud(allowExtensionsTypes.image).single('subCategory', 1),

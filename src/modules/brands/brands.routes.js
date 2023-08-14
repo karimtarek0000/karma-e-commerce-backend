@@ -5,17 +5,29 @@ import {
   allowExtensionsTypes,
   uploadFilesWithCloud,
 } from '../../services/uploadFiles.cloud.js';
-import { addNewBrand, deleteBrand } from './brands.controller.js';
-import { brandSchema } from './brands.validation.js';
+import {
+  addNewBrand,
+  deleteBrand,
+  getAllBrands,
+  updateBrand,
+} from './brands.controller.js';
+import { brandSchema, updateBrandSchema } from './brands.validation.js';
 
 const router = Router();
 
 router
+  .get('/', errorHandler(getAllBrands))
   .post(
     '/',
     uploadFilesWithCloud(allowExtensionsTypes.image).single('brand', 1),
     validationCore(brandSchema),
     errorHandler(addNewBrand)
+  )
+  .patch(
+    '/',
+    uploadFilesWithCloud(allowExtensionsTypes.image).single('brand', 1),
+    validationCore(updateBrandSchema),
+    errorHandler(updateBrand)
   )
   .delete('/', errorHandler(deleteBrand));
 

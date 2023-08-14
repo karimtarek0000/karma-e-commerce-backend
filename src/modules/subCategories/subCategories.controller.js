@@ -6,6 +6,12 @@ import cloudinary from '../../lib/cloudinary.cloud.js';
 import { sendError } from '../../lib/sendError.js';
 import { brandModel } from '../../../DB/models/Brand.model.js';
 
+export const getAllSubCategories = async (req, res) => {
+  const subCategories = await subCategoryModel.find();
+
+  res.status(200).json({ message: 'All sub categories', subCategories });
+};
+
 export const createNewSubCategory = async (req, res, next) => {
   const { file } = req;
   const { name, categoryId } = req.body;

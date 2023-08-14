@@ -6,6 +6,12 @@ import cloudinary from '../../lib/cloudinary.cloud.js';
 import { sendError } from '../../lib/sendError.js';
 import { brandModel } from '../../../DB/models/Brand.model.js';
 
+export const getAllBrands = async (req, res) => {
+  const brands = await brandModel.find();
+
+  res.status(200).json({ message: 'All brands', brands });
+};
+
 export const addNewBrand = async (req, res, next) => {
   const { file } = req;
   const { name, categoryId, subCategoryId } = req.body;
@@ -42,6 +48,55 @@ export const addNewBrand = async (req, res, next) => {
   }
 
   res.status(201).json({ message: 'Create new brand', brand });
+};
+
+export const updateBrand = async (req, res, next) => {
+  const { file } = req;
+  const { id, name } = req.body;
+
+  if (!name || !file) {
+    return sendError(next, 'No any data found to update', 400);
+  }
+
+  const brand = await brandModel
+    .findById(id)
+    .populate([{ path: 'categoryId' }, { path: 'subCategoryId' }]);
+
+  // Check if brand id exist or not
+  if (!brand) {
+    return sendError(next, 'No brand found with this id', 400);
+  }
+
+  // If name exist
+  if (name) {
+    const slug = slugify(name, '_');
+
+    brand.name = name;
+    brand.slug = slug;
+  }
+
+  // If there image
+  if (file) {
+    // Delete old image
+    await cloudinary.uploader.destroy(brand.image.public_id);
+
+    // Upload new image
+    const { public_id, secure_url } = await cloudinary.uploader.upload(
+      file.path,
+      {
+        folder: `${process.env.FOLDER_NAME}/categories/${brand.categoryId.customId}/subCategories/${brand.subCategoryId.customId}/brands/${brand.customId}`,
+      }
+    );
+
+    brand.image = { public_id, secure_url };
+  }
+
+  const brandData = await brand.save();
+
+  res.status(201).json({
+    message: 'Update brand successfully',
+    brand: brandData,
+  });
 };
 
 export const deleteBrand = async (req, res, next) => {
