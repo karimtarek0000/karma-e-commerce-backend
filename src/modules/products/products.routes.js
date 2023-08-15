@@ -28,7 +28,5 @@ router
     errorHandler(updateProduct)
   )
   .delete('/:productId', errorHandler(deleteProduct));
-//   .delete('/:categoryId', errorHandler(deleteCategory))
-//   .get('/', errorHandler(getCategories));
 
 export default router;
