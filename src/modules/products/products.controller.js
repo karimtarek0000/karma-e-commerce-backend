@@ -226,3 +226,33 @@ export const updateProduct = async (req, res, next) => {
 
   res.status(200).json({ message: 'Update product successfully', newProduct });
 };
+
+export const deleteProduct = async (req, res, next) => {
+  const { productId } = req.params;
+
+  const product = await productModel.findByIdAndDelete(productId).populate([
+    {
+      path: 'categoryId',
+    },
+    {
+      path: 'subCategoryId',
+    },
+    {
+      path: 'brandId',
+    },
+  ]);
+
+  if (!product) {
+    return sendError(next, 'No there any product with this id', 400);
+  }
+
+  // -------------------------- Delete all images for product --------------------------
+  const path = `${process.env.FOLDER_NAME}/categories/${product.categoryId.customId}/subCategories/${product.subCategoryId.customId}/brands/${product.brandId.customId}/products/${product.customId}`;
+
+  await cloudinary.api.delete_resources_by_prefix(path);
+  await cloudinary.api.delete_folder(path);
+
+  res
+    .status(200)
+    .json({ message: 'Delete products successfully', status: true });
+};

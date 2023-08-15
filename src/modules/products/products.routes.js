@@ -6,7 +6,11 @@ import {
   uploadFilesWithCloud,
 } from '../../services/uploadFiles.cloud.js';
 import { productSchema, updateProductSchema } from './products.validation.js';
-import { addNewProduct, updateProduct } from './products.controller.js';
+import {
+  addNewProduct,
+  deleteProduct,
+  updateProduct,
+} from './products.controller.js';
 
 const router = Router();
 
@@ -22,7 +26,8 @@ router
     uploadFilesWithCloud(allowExtensionsTypes.image).array('product', 4),
     validationCore(updateProductSchema),
     errorHandler(updateProduct)
-  );
+  )
+  .delete('/:productId', errorHandler(deleteProduct));
 //   .delete('/:categoryId', errorHandler(deleteCategory))
 //   .get('/', errorHandler(getCategories));
 
