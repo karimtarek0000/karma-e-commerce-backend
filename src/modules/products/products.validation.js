@@ -31,5 +31,5 @@ export const updateProductSchema = {
     sizes: JOI.array().items(JOI.string().trim()),
   }),
 
-  files: JOI.array().min(1),
+  files: JOI.array(),
 };

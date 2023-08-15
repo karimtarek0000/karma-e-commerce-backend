@@ -5,23 +5,24 @@ import {
   allowExtensionsTypes,
   uploadFilesWithCloud,
 } from '../../services/uploadFiles.cloud.js';
-import { productSchema } from './products.validation.js';
-import { addNewProduct } from './products.controller.js';
+import { productSchema, updateProductSchema } from './products.validation.js';
+import { addNewProduct, updateProduct } from './products.controller.js';
 
 const router = Router();
 
-router.post(
-  '/',
-  uploadFilesWithCloud(allowExtensionsTypes.image).array('product', 4),
-  validationCore(productSchema),
-  errorHandler(addNewProduct)
-);
-//   .patch(
-//     '/',
-//     uploadFilesWithCloud(allowExtensionsTypes.image).single('category', 1),
-//     validationCore(updateCategorySchema),
-//     errorHandler(updateCategory)
-//   )
+router
+  .post(
+    '/',
+    uploadFilesWithCloud(allowExtensionsTypes.image).array('product', 4),
+    validationCore(productSchema),
+    errorHandler(addNewProduct)
+  )
+  .patch(
+    '/:productId',
+    uploadFilesWithCloud(allowExtensionsTypes.image).array('product', 4),
+    validationCore(updateProductSchema),
+    errorHandler(updateProduct)
+  );
 //   .delete('/:categoryId', errorHandler(deleteCategory))
 //   .get('/', errorHandler(getCategories));
 
