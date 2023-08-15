@@ -6,6 +6,24 @@ import { categoryModel } from '../../../DB/models/Category.model.js';
 import cloudinary from '../../lib/cloudinary.cloud.js';
 import { subCategoryModel } from '../../../DB/models/SubCategory.model.js';
 import { brandModel } from '../../../DB/models/Brand.model.js';
+import { paginationHandler } from '../../utils/pagination.js';
+
+export const allProducts = async (req, res) => {
+  const { page, size } = req.query;
+
+  const { limit, skip } = paginationHandler(page, size);
+
+  const countOfProducts = await productModel.count();
+  const products = await productModel.find().limit(limit).skip(skip);
+
+  res.status(200).json({
+    message: 'All products',
+    page: +page || 1,
+    limit: +limit,
+    countOfProducts,
+    products,
+  });
+};
 
 export const addNewProduct = async (req, res, next) => {
   const { files } = req;

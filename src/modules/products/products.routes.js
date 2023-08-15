@@ -8,6 +8,7 @@ import {
 import { productSchema, updateProductSchema } from './products.validation.js';
 import {
   addNewProduct,
+  allProducts,
   deleteProduct,
   updateProduct,
 } from './products.controller.js';
@@ -15,6 +16,7 @@ import {
 const router = Router();
 
 router
+  .get('/', errorHandler(allProducts))
   .post(
     '/',
     uploadFilesWithCloud(allowExtensionsTypes.image).array('product', 4),
