@@ -115,14 +115,22 @@ export const deleteBrand = async (req, res, next) => {
     return sendError(next, 'Brand id not valid', 400);
   }
 
+  // Delete brand from database
+  const brandDeleted = await brandModel.deleteOne({ _id: brandId });
+
+  if (!brandDeleted.deletedCount) {
+    return sendError(
+      next,
+      'Error happend while delete brand please try again',
+      400
+    );
+  }
+
   // Delete brand image
   const path = `${process.env.FOLDER_NAME}/categories/${brand.categoryId.customId}/subCategories/${brand.subCategoryId.customId}/brands/${brand.customId}`;
 
   await cloudinary.api.delete_resources_by_prefix(path);
   await cloudinary.api.delete_folder(path);
-
-  // Delete brand from database
-  await brandModel.deleteOne({ _id: brandId });
 
   res.status(200).json({ message: 'Delete brand successfully', status: true });
 };

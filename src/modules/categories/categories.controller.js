@@ -5,6 +5,7 @@ import cloudinary from '../../lib/cloudinary.cloud.js';
 import { sendError } from '../../lib/sendError.js';
 import { subCategoryModel } from '../../../DB/models/SubCategory.model.js';
 import { brandModel } from '../../../DB/models/Brand.model.js';
+import { productModel } from '../../../DB/models/Product.model.js';
 
 export const createNewCategory = async (req, res, next) => {
   const { file } = req;
@@ -106,15 +107,32 @@ export const deleteCategory = async (req, res, next) => {
   if (!category) return sendError(next, 'Category id not correct!', 400);
 
   // Delete subcategory and brand
-  const [subCategory, brand] = await Promise.all([
+  const [subCategory, brand, product] = await Promise.all([
     subCategoryModel.deleteMany({ categoryId }),
     brandModel.deleteMany({ categoryId }),
+    productModel.deleteMany({ categoryId }),
   ]);
 
-  if (!subCategory.deletedCount && !brand.deletedCount) {
+  if (!subCategory.deletedCount) {
     return sendError(
       next,
-      'Error happend while delete subcategory and brand please try again',
+      'Error happend while delete subcategories please try again',
+      400
+    );
+  }
+
+  if (!brand.deletedCount) {
+    return sendError(
+      next,
+      'Error happend while delete brands please try again',
+      400
+    );
+  }
+
+  if (!product.deletedCount) {
+    return sendError(
+      next,
+      'Error happend while delete products please try again',
       400
     );
   }
