@@ -23,6 +23,7 @@ export const addNewProduct = async (req, res, next) => {
     sizes,
   } = req.body;
 
+  // -------------------------- Checks --------------------------
   const categoryExist = await categoryModel.findById(categoryId);
 
   if (!categoryExist) {
@@ -41,9 +42,9 @@ export const addNewProduct = async (req, res, next) => {
     return sendError(next, 'No there any brand with this id', 400);
   }
 
+  // -------------------------- Upload all images --------------------------
   const customId = nanoid(20);
 
-  // Upload images
   const images = [];
   const publicIds = [];
 
@@ -67,6 +68,7 @@ export const addNewProduct = async (req, res, next) => {
 
   const slug = slugify(title, '_');
 
+  // -------------------------- Save data on database --------------------------
   const product = await productModel.create({
     title,
     description,
