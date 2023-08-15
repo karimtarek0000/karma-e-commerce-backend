@@ -10,6 +10,7 @@ import {
   addNewProduct,
   allProducts,
   deleteProduct,
+  searchProducts,
   updateProduct,
 } from './products.controller.js';
 
@@ -17,6 +18,7 @@ const router = Router();
 
 router
   .get('/', errorHandler(allProducts))
+  .get('/search', errorHandler(searchProducts))
   .post(
     '/',
     uploadFilesWithCloud(allowExtensionsTypes.image).array('product', 4),

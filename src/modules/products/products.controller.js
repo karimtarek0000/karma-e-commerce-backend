@@ -25,6 +25,24 @@ export const allProducts = async (req, res) => {
   });
 };
 
+export const searchProducts = async (req, res) => {
+  const { title, page, size } = req.query;
+
+  const { limit, skip } = paginationHandler(page, size);
+
+  const products = await productModel
+    .find({ title: { $regex: title } })
+    .limit(limit)
+    .skip(skip);
+
+  res.status(200).json({
+    message: 'Search for products',
+    page: +page || 1,
+    limit: +limit,
+    products,
+  });
+};
+
 export const addNewProduct = async (req, res, next) => {
   const { files } = req;
 
