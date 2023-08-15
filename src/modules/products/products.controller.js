@@ -31,7 +31,7 @@ export const searchProducts = async (req, res) => {
   const { limit, skip } = paginationHandler(page, size);
 
   const products = await productModel
-    .find({ title: { $regex: title } })
+    .find({ title: { $regex: title, $options: 'i' } })
     .limit(limit)
     .skip(skip);
 
