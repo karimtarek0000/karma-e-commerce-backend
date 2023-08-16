@@ -103,12 +103,12 @@ export const addNewProduct = async (req, res, next) => {
 
   const slug = slugify(title, '_');
 
+  // -------------------------- Send fn to catch if happend any error --------------------------
   async function deleteResources() {
     await cloudinary.api.delete_resources_by_prefix(path);
     await cloudinary.api.delete_folder(path);
   }
 
-  // Send to catch if happend any error
   req.catchErrorFn = deleteResources;
 
   // -------------------------- Save data on database --------------------------
