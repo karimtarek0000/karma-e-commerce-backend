@@ -18,15 +18,23 @@ export const createNewCategory = async (req, res, next) => {
   }
 
   const customId = nanoid(20);
+  const path = `${process.env.FOLDER_NAME}/categories/${customId}`;
 
   const { public_id, secure_url } = await cloudinary.uploader.upload(
     file.path,
     {
-      folder: `${process.env.FOLDER_NAME}/categories/${customId}`,
+      folder: path,
     }
   );
 
-  // TODO: Add createdBy later
+  // -------------------------- Send fn to catch if happend any error --------------------------
+  async function deleteResources() {
+    await cloudinary.api.delete_resources_by_prefix(path);
+    await cloudinary.api.delete_folder(path);
+  }
+
+  req.catchErrorFn = deleteResources;
+
   const slug = slugify(name, '_');
   const categoryData = await categoryModel.create({
     name,
@@ -37,10 +45,11 @@ export const createNewCategory = async (req, res, next) => {
 
   // If data not created in database will remove image
   if (!categoryData) {
-    await cloudinary.uploader.destroy(public_id);
+    await deleteResources();
+
     return sendError(
       next,
-      'Error happend when create data please try again!',
+      'Error happend when create category please try again!',
       400
     );
   }
