@@ -82,19 +82,18 @@ export const addNewProduct = async (req, res, next) => {
   const customId = nanoid(20);
 
   const images = [];
-  const publicIds = [];
+  const path = `${process.env.FOLDER_NAME}/categories/${categoryExist.customId}/subCategories/${subCategoryExist.customId}/brands/${brandExist.customId}/products/${customId}`;
 
   for (const file of files) {
     // eslint-disable-next-line no-await-in-loop
     const { public_id, secure_url } = await cloudinary.uploader.upload(
       file.path,
       {
-        folder: `${process.env.FOLDER_NAME}/categories/${categoryExist.customId}/subCategories/${subCategoryExist.customId}/brands/${brandExist.customId}/products/${customId}`,
+        folder: path,
       }
     );
 
     images.push({ public_id, secure_url });
-    publicIds.push(public_id);
   }
 
   // Save all data in database
@@ -103,6 +102,14 @@ export const addNewProduct = async (req, res, next) => {
     : price;
 
   const slug = slugify(title, '_');
+
+  async function deleteResources() {
+    await cloudinary.api.delete_resources_by_prefix(path);
+    await cloudinary.api.delete_folder(path);
+  }
+
+  // Send to catch if happend any error
+  req.catchErrorFn = deleteResources;
 
   // -------------------------- Save data on database --------------------------
   const product = await productModel.create({
@@ -123,7 +130,7 @@ export const addNewProduct = async (req, res, next) => {
   });
 
   if (!product) {
-    await cloudinary.api.delete_resources(publicIds);
+    await deleteResources();
     return sendError(next, 'Error happend while save data, please try again');
   }
 

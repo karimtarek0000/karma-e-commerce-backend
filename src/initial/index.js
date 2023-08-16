@@ -8,6 +8,7 @@ import {
   subCategoriesRoutes,
   brandsRoutes,
   productsRoutes,
+  couponsRoutes,
 } from './routes.all.js';
 
 export default function initialProject(app) {
@@ -22,6 +23,7 @@ export default function initialProject(app) {
   app.use('/sub-categories', subCategoriesRoutes);
   app.use('/brands', brandsRoutes);
   app.use('/products', productsRoutes);
+  app.use('/coupons', couponsRoutes);
   app.use('/users', usersRoutes);
 
   // 404 ( Not Found )

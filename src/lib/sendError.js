@@ -1,3 +1,2 @@
-export const sendError = (next, message, status) => {
-  return next(new Error(message, { cause: status }));
-};
+export const sendError = (next, message, status) =>
+  next(new Error(message, { cause: status }));

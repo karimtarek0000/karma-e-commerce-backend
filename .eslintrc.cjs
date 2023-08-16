@@ -30,5 +30,7 @@ module.exports = {
     'import/prefer-default-export': ['off'],
     camelcase: ['off'],
     'no-restricted-syntax': ['off'],
+    'newline-per-chained-call': ['off'],
+    'no-return-await': ['off'],
   },
 };
