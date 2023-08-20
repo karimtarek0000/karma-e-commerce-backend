@@ -32,5 +32,6 @@ module.exports = {
     'no-restricted-syntax': ['off'],
     'newline-per-chained-call': ['off'],
     'no-return-await': ['off'],
+    'object-curly-newline': ['off'],
   },
 };

@@ -5,7 +5,6 @@ import {
   allowExtensionsTypes,
   uploadFilesWithCloud,
 } from '../../services/uploadFiles.cloud.js';
-import { productSchema, updateProductSchema } from './products.validation.js';
 import {
   addNewProduct,
   allProducts,
@@ -13,6 +12,7 @@ import {
   searchProducts,
   updateProduct,
 } from './products.controller.js';
+import { productSchema, updateProductSchema } from './products.validation.js';
 
 const router = Router();
 
