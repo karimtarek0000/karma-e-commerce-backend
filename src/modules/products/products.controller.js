@@ -10,8 +10,6 @@ import { paginationHandler } from '../../utils/pagination.js';
 import { ApiFeatures } from '../../lib/apiFeatures.js';
 
 export const allProducts = async (req, res) => {
-  // const { page, size, sort, select, search } = req.query;
-
   const { mongooseQuery, limit, page } = new ApiFeatures(
     productModel.find(),
     req.query

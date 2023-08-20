@@ -1,5 +1,18 @@
+import { Types } from 'mongoose';
+import JOI from 'joi';
+
 const placesData = ['body', 'params', 'query', 'file', 'files'];
 
+// ---------- Custom validation ---------------
+const validationObjectId = (value, helper) =>
+  Types.ObjectId.isValid(value) ? true : helper.message('Invalid id');
+
+// ---------- General validation ---------------
+export const generalValidations = {
+  _id: JOI.string().custom(validationObjectId),
+};
+
+// ---------- Validation core ---------------
 export const validationCore = (schema) => (req, res, next) => {
   const validationErrors = [];
 

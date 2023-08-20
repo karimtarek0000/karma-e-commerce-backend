@@ -33,5 +33,6 @@ module.exports = {
     'newline-per-chained-call': ['off'],
     'no-return-await': ['off'],
     'object-curly-newline': ['off'],
+    'no-confusing-arrow': ['off'],
   },
 };
