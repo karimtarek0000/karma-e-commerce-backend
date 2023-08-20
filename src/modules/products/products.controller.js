@@ -7,47 +7,28 @@ import cloudinary from '../../lib/cloudinary.cloud.js';
 import { subCategoryModel } from '../../../DB/models/SubCategory.model.js';
 import { brandModel } from '../../../DB/models/Brand.model.js';
 import { paginationHandler } from '../../utils/pagination.js';
+import { ApiFeatures } from '../../lib/apiFeatures.js';
 
 export const allProducts = async (req, res) => {
-  const { page, size, sort, select, search } = req.query;
+  // const { page, size, sort, select, search } = req.query;
 
-  const { limit, skip } = paginationHandler(page, size);
+  const { mongooseQuery, limit, page } = new ApiFeatures(
+    productModel.find(),
+    req.query
+  )
+    .pagination()
+    .sort()
+    .select()
+    .filter()
+    .search();
 
-  // -------- Exclude operators from req.query --------
-  const excludeKeys = ['page', 'size', 'sort', 'select', 'search'];
-  excludeKeys.forEach((key) => delete req.query[key]);
-
-  // -------- Convert req.query to string to make add $ before operator --------
-  const query = JSON.parse(
-    JSON.stringify(req.query).replace(
-      /gt|gte|lt|lte|in|nin|eq/g,
-      (operator) => `$${operator}`
-    )
-  );
-
-  const countOfProducts = await productModel.count();
-  const products = await productModel
-    .find({
-      ...query,
-      $or: [
-        {
-          title: { $regex: search ?? '', $options: 'i' },
-        },
-        {
-          description: { $regex: search ?? '', $options: 'i' },
-        },
-      ],
-    })
-    .limit(limit)
-    .skip(skip)
-    .sort(sort?.replaceAll(',', ' '))
-    .select(select?.replaceAll(',', ' '));
+  const products = await mongooseQuery;
 
   res.status(200).json({
     message: 'All products',
-    page: +page || 1,
-    limit: +limit,
-    countOfProducts,
+    page,
+    limit,
+    countOfProducts: products.length,
     products,
   });
 };
