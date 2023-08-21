@@ -1,21 +1,26 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema } from 'mongoose';
 
 const users = new Schema(
   {
+    name: {
+      type: String,
+      required: true,
+    },
     email: {
       type: String,
       required: true,
     },
-    userName: {
-      type: String,
-      required: true,
-    },
-    contactNumber: {
+    phoneNumber: {
       type: String,
       required: true,
     },
     password: {
       type: String,
+      required: true,
+    },
+    isConfirm: {
+      type: Boolean,
+      default: false,
       required: true,
     },
   },
@@ -24,4 +29,4 @@ const users = new Schema(
   }
 );
 
-export const userModel = mongoose.model("user", users);
+export const userModel = mongoose.model('user', users);

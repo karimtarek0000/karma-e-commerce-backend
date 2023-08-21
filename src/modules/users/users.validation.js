@@ -1,20 +1,19 @@
-import JOI from "joi";
+import JOI from 'joi';
 
 export const newUserSchema = {
   body: JOI.object({
-    userName: JOI.string().trim().required(),
+    name: JOI.string().trim(),
     email: JOI.string()
       .email({ tlds: { allow: true } })
-      .required()
       .messages({
-        "string.email": "Please enter a valid email address",
-        "any.required": "Email is required",
+        'string.email': 'Please enter a valid email address',
+        'any.required': 'Email is required',
       }),
-    contactNumber: JOI.string().trim().required(),
-    password: JOI.string()
-      .regex(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/)
-      .required(),
-  }).required(),
+    phoneNumber: JOI.string().trim().min(11).max(11),
+    password: JOI.string().regex(
+      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/
+    ),
+  }).options({ presence: 'required' }),
 };
 
 export const signInSchema = {
@@ -23,8 +22,8 @@ export const signInSchema = {
       .email({ tlds: { allow: true } })
       .required()
       .messages({
-        "string.email": "Please enter a valid email address",
-        "any.required": "Email is required",
+        'string.email': 'Please enter a valid email address',
+        'any.required': 'Email is required',
       }),
     password: JOI.string().required(),
   }).required(),
