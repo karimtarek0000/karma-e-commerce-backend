@@ -83,12 +83,12 @@ export const signIn = async (req, res, next) => {
 };
 
 export const refreshToken = async (req, res, next) => {
-  const refreshToken = req.cookies?.jwtRefreshToken;
+  const jwtRefreshToken = req.cookies?.jwtRefreshToken;
 
-  if (!refreshToken) return sendError(next, 'Refresh token not exist!', 400);
+  if (!jwtRefreshToken) return sendError(next, 'Refresh token not exist!', 400);
 
   JWT.verify(
-    refreshToken,
+    jwtRefreshToken,
     process.env.REFRESH_TOKE_SECRET,
     async (err, data) => {
       if (err || !data._id || !data.email) {
