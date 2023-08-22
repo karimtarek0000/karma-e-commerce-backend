@@ -34,5 +34,6 @@ module.exports = {
     'no-return-await': ['off'],
     'object-curly-newline': ['off'],
     'no-confusing-arrow': ['off'],
+    'import/no-extraneous-dependencies': ['off'],
   },
 };

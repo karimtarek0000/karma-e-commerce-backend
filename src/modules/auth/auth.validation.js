@@ -13,6 +13,7 @@ export const newUserSchema = {
     password: JOI.string().regex(
       /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/
     ),
+    role: JOI.string().valid('Buyer', 'Trader', 'Admin', 'SuperAdmin'),
   }).options({ presence: 'required' }),
 };
 

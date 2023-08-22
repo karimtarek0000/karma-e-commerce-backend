@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { errorHandler } from '../../lib/errorHandler.js';
 import { validationCore } from '../../middlewares/validations.js';
 import {
+  confirmEmail,
   createNewUser,
   logOut,
   refreshToken,
@@ -12,6 +13,7 @@ import { newUserSchema, signInSchema } from './auth.validation.js';
 const router = Router();
 
 router.post('/', validationCore(newUserSchema), errorHandler(createNewUser));
+router.get('/confirm/:token', errorHandler(confirmEmail));
 router.post('/sign-in', validationCore(signInSchema), errorHandler(signIn));
 
 router.get('/refresh-token', errorHandler(refreshToken));

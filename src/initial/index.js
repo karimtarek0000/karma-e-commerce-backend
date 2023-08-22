@@ -3,7 +3,7 @@ import { dbConnection } from '../../DB/connection.js';
 
 // Routes
 import {
-  usersRoutes,
+  authRoutes,
   categoriesRoutes,
   subCategoriesRoutes,
   brandsRoutes,
@@ -24,7 +24,7 @@ export default function initialProject(app) {
   app.use('/brands', brandsRoutes);
   app.use('/products', productsRoutes);
   app.use('/coupons', couponsRoutes);
-  app.use('/users', usersRoutes);
+  app.use('/auth', authRoutes);
 
   // 404 ( Not Found )
   app.use('*', (_, res) =>

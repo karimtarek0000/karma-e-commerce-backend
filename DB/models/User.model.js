@@ -37,7 +37,7 @@ const users = new Schema(
     },
     status: {
       type: String,
-      default: 'offline',
+      default: 'Offline',
       enum: {
         values: ['Online', 'Offline'],
         message: '{Value} is not a valid status',

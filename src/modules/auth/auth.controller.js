@@ -2,9 +2,12 @@ import bcrypt from 'bcrypt';
 import JWT from 'jsonwebtoken';
 import { userModel } from '../../../DB/models/User.model.js';
 import { sendError } from '../../lib/sendError.js';
+import { generateToken } from '../../utils/useToken.js';
+import { sendEmailService } from '../../services/sendEmail.js';
+import { emailTemplate } from '../../utils/template.email.js';
 
 export const createNewUser = async (req, res, next) => {
-  const { name, email, phoneNumber, password } = req.body;
+  const { name, email, phoneNumber, password, role } = req.body;
 
   const userExist = await userModel.findOne({ email });
 
@@ -18,23 +21,70 @@ export const createNewUser = async (req, res, next) => {
 
   if (!hashPassword) return sendError(next, 'Error hashing password', 400);
 
+  // ---- Send confirmlink to email user ------
+  const token = generateToken({
+    payload: {
+      name,
+      email,
+      role,
+    },
+    sign: process.env.ACCESS_TOKEN_SECRET,
+    options: {
+      expiresIn: '1h',
+    },
+  });
+
+  const confirmLink = `${req.protocol}://${req.headers.host}/auth/confirm/${token}`;
+
+  const confirmLinkStatus = sendEmailService({
+    to: email,
+    subject: 'Confirm email in karma',
+    message: emailTemplate({
+      link: confirmLink,
+      subject: 'Confirm Your Email Address',
+    }),
+  });
+
+  if (!confirmLinkStatus) {
+    return sendError(next, 'Error when send to you confirm link email', 400);
+  }
+
   // ---- Save the user data in database ------
   const data = await userModel.create({
     name,
     email,
     phoneNumber,
+    role,
     password: hashPassword,
   });
 
-  if (!data) return sendError(next, 'Error saving data', 400);
+  if (!data) return sendError(next, 'Error saving data in our database', 400);
 
   res.status(201).json({
-    message: 'New user created successfully',
+    message: 'User created and has been send confirm link to verify your email',
     user: {
       name: data.name,
       email: data.email,
+      role: data.role,
     },
   });
+};
+
+export const confirmEmail = async (req, res, next) => {
+  const { token } = req.params;
+
+  const decoded = JWT.verify(token, process.env.ACCESS_TOKEN_SECRET);
+
+  if (!decoded.email) return sendError(next, 'Token not valid', 400);
+
+  const user = await userModel.findOneAndUpdate(
+    { email: decoded.email, isConfirmed: false },
+    { isConfirmed: true }
+  );
+
+  if (!user) return sendError(next, 'User not found', 400);
+
+  res.status(200).json({ message: 'Confirmed email successfully' });
 };
 
 export const signIn = async (req, res, next) => {
