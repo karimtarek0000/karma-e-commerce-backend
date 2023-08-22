@@ -1,4 +1,4 @@
-import mongoose, { Schema } from 'mongoose';
+import { Schema, model } from 'mongoose';
 
 const users = new Schema(
   {
@@ -8,6 +8,7 @@ const users = new Schema(
     },
     email: {
       type: String,
+      unique: true,
       required: true,
     },
     phoneNumber: {
@@ -18,7 +19,42 @@ const users = new Schema(
       type: String,
       required: true,
     },
-    isConfirm: {
+    profilePicture: {
+      public_id: {
+        type: String,
+      },
+      secure_url: {
+        type: String,
+      },
+    },
+    role: {
+      type: String,
+      enum: {
+        values: ['Buyer', 'Trader', 'Admin', 'SuperAdmin'],
+        message: '{Value} is not a valid role',
+      },
+      required: true,
+    },
+    status: {
+      type: String,
+      default: 'offline',
+      enum: {
+        values: ['Online', 'Offline'],
+        message: '{Value} is not a valid status',
+      },
+    },
+    address: {
+      type: String,
+      required: false,
+    },
+    token: {
+      type: String,
+      required: false,
+    },
+    forgetCode: {
+      type: String,
+    },
+    isConfirmed: {
       type: Boolean,
       default: false,
       required: true,
@@ -29,4 +65,4 @@ const users = new Schema(
   }
 );
 
-export const userModel = mongoose.model('user', users);
+export const userModel = model('user', users);

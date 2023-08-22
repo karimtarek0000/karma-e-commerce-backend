@@ -52,11 +52,11 @@ export const signIn = async (req, res, next) => {
     return sendError(next, 'Email or password not correct!', 400);
   }
 
-  const { _id, name, email, isConfirm } = userData;
+  const { _id, name, email, isConfirmed } = userData;
 
   // ---- Create access token and refresh token ----
   const accessToken = JWT.sign(
-    { _id, email, name, isConfirm },
+    { _id, email, name, isConfirmed },
     process.env.ACCESS_TOKEN_SECRET,
     {
       expiresIn: '30s',
@@ -64,7 +64,7 @@ export const signIn = async (req, res, next) => {
   );
 
   const refreshToken = JWT.sign(
-    { _id, email, name, isConfirm },
+    { _id, email, name, isConfirmed },
     process.env.REFRESH_TOKE_SECRET,
     {
       expiresIn: '7d',

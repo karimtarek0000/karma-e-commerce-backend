@@ -6,8 +6,8 @@ import {
   logOut,
   refreshToken,
   signIn,
-} from './users.controller.js';
-import { newUserSchema, signInSchema } from './users.validation.js';
+} from './auth.controller.js';
+import { newUserSchema, signInSchema } from './auth.validation.js';
 
 const router = Router();
 
