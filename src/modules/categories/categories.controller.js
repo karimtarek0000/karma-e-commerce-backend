@@ -127,18 +127,6 @@ export const deleteCategory = async (req, res, next) => {
     productModel.deleteMany({ categoryId }),
   ]);
 
-  if (!subCategory.deletedCount) {
-    return sendError(next, 'Error happend while delete subcategories please try again', 400);
-  }
-
-  if (!brand.deletedCount) {
-    return sendError(next, 'Error happend while delete brands please try again', 400);
-  }
-
-  if (!product.deletedCount) {
-    return sendError(next, 'Error happend while delete products please try again', 400);
-  }
-
   // Delete all in folder customId into categories folder and after that delete folder
   const path = `${process.env.FOLDER_NAME}/categories/${category.customId}`;
 
