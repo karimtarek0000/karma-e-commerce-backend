@@ -48,7 +48,7 @@ const userSchema = new Schema(
       type: String,
       required: false,
     },
-    token: {
+    accessToken: {
       type: String,
       required: false,
     },

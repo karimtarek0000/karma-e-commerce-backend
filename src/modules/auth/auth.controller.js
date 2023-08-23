@@ -99,24 +99,28 @@ export const signIn = async (req, res, next) => {
     return sendError(next, 'Email or password not correct!', 400);
   }
 
-  const { _id, name, email, isConfirmed } = userData;
+  const { _id, name, email, isConfirmed, role } = userData;
 
   // ---- Create access token and refresh token ----
-  const accessToken = JWT.sign(
-    { _id, email, name, isConfirmed },
-    process.env.ACCESS_TOKEN_SECRET,
-    {
-      expiresIn: '30s',
-    }
-  );
+  const payload = {
+    _id,
+    email,
+    name,
+    isConfirmed,
+    role,
+  };
 
-  const refreshToken = JWT.sign(
-    { _id, email, name, isConfirmed },
-    process.env.REFRESH_TOKE_SECRET,
-    {
-      expiresIn: '7d',
-    }
-  );
+  const accessToken = generateToken({
+    payload,
+    sign: process.env.ACCESS_TOKEN_SECRET,
+    options: { expiresIn: '15m' },
+  });
+
+  const refreshToken = generateToken({
+    payload,
+    sign: process.env.REFRESH_TOKE_SECRET,
+    options: { expiresIn: '7d' },
+  });
 
   // ---- Adding refresh token in cookies ----
   res.cookie('jwtRefreshToken', refreshToken, {
@@ -126,7 +130,21 @@ export const signIn = async (req, res, next) => {
     maxAge: 120 * 60 * 60 * 1000,
   });
 
-  res.status(200).json({ message: 'Login successfully', accessToken });
+  // ---- Finally adding access token and update status ----
+  const user = await userModel
+    .findOneAndUpdate(
+      { email },
+      {
+        accessToken,
+        status: 'Online',
+      },
+      {
+        new: true,
+      }
+    )
+    .select('-password');
+
+  res.status(200).json({ message: 'Login successfully', user });
 };
 
 export const refreshToken = async (req, res, next) => {
