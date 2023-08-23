@@ -1,6 +1,6 @@
-import mongoose, { Schema } from 'mongoose';
+import { Schema, model } from 'mongoose';
 
-const coupon = new Schema(
+const couponSchema = new Schema(
   {
     couponCode: {
       type: String,
@@ -25,7 +25,7 @@ const coupon = new Schema(
     createdBy: {
       type: Schema.Types.ObjectId,
       ref: 'user',
-      required: false,
+      required: true,
     },
     updatedBy: {
       type: Schema.Types.ObjectId,
@@ -73,4 +73,4 @@ const coupon = new Schema(
   }
 );
 
-export const couponModel = mongoose.model('coupon', coupon);
+export const couponModel = model('coupon', couponSchema);

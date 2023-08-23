@@ -1,6 +1,6 @@
-import mongoose, { Schema } from 'mongoose';
+import { Schema, model } from 'mongoose';
 
-const category = new Schema(
+const categorySchema = new Schema(
   {
     name: {
       type: String,
@@ -30,7 +30,7 @@ const category = new Schema(
     createdBy: {
       type: Schema.Types.ObjectId,
       ref: 'user',
-      required: false,
+      required: true,
     },
   },
   {
@@ -40,10 +40,11 @@ const category = new Schema(
   }
 );
 
+// Virtual
 category.virtual('subCategories', {
   ref: 'subcategory',
   foreignField: 'categoryId',
   localField: '_id',
 });
 
-export const categoryModel = mongoose.model('category', category);
+export const categoryModel = model('category', categorySchema);

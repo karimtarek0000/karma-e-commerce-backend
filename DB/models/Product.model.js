@@ -1,6 +1,6 @@
-import mongoose, { Schema } from 'mongoose';
+import { Schema, model } from 'mongoose';
 
-const product = new Schema(
+const productSchema = new Schema(
   {
     title: {
       type: String,
@@ -61,7 +61,7 @@ const product = new Schema(
     createdBy: {
       type: Schema.Types.ObjectId,
       ref: 'user',
-      required: false,
+      required: true,
     },
     updatedBy: {
       type: Schema.Types.ObjectId,
@@ -94,4 +94,4 @@ const product = new Schema(
   }
 );
 
-export const productModel = mongoose.model('product', product);
+export const productModel = model('product', productSchema);
