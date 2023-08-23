@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt';
 import JWT from 'jsonwebtoken';
+import { nanoid } from 'nanoid';
 import { userModel } from '../../../DB/models/User.model.js';
 import { sendError } from '../../lib/sendError.js';
 import { generateToken } from '../../utils/useToken.js';
@@ -147,6 +148,97 @@ export const signIn = async (req, res, next) => {
   res.status(200).json({ message: 'Login successfully', user });
 };
 
+export const forgetPassword = async (req, res, next) => {
+  const { email } = req.body;
+
+  if (!email) return sendError(next, 'Email not exist!', 400);
+
+  // ---- Check if email exist or not ----
+  const user = await userModel.findOne({ email });
+  if (!user) return sendError(next, 'Email not found!', 400);
+
+  // ---- Generate code to send to user on email ----
+  const code = nanoid(12);
+  const hashedCode = bcrypt.hashSync(code, +process.env.HASH_LEVEL);
+
+  const token = generateToken({
+    payload: { email, hashedCode },
+    sign: process.env.ACCESS_TOKEN_SECRET,
+    options: { expiresIn: '1h' },
+  });
+
+  // ---- Send email to user ----
+  const confirmLink = `${req.protocol}://${req.headers.host}/auth/reset-password/${token}`;
+
+  const forgetPasswordLink = sendEmailService({
+    to: email,
+    subject: 'Reset password in karma',
+    message: emailTemplate({
+      link: confirmLink,
+      subject: 'Email reset password',
+      btnTitle: 'Reset password',
+    }),
+  });
+
+  if (!forgetPasswordLink) {
+    return sendError(next, 'Faild send email to reset password', 400);
+  }
+
+  // ---- Update user on database ----
+  const updateUser = await userModel.findOneAndUpdate(
+    { email },
+    {
+      forgetCode: code,
+    },
+    {
+      new: true,
+    }
+  );
+
+  if (!updateUser) {
+    return sendError(next, 'Update user faild', 400);
+  }
+
+  res.status(200).json({ message: 'Has been send email for reset password' });
+};
+
+export const resetPassword = async (req, res, next) => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  // ------ Decoded token -------
+  const decoded = JWT.verify(token, process.env.ACCESS_TOKEN_SECRET);
+  if (!decoded.email) return sendError(next, 'Token not valid', 400);
+
+  // ------ Check email exist ot not -------
+  const user = await userModel.findOne({ email: decoded.email });
+  if (!user) return sendError(next, 'User not found', 400);
+
+  // ------ Check if exist forgetCode or not -------
+  if (!user.forgetCode) return sendError(next, 'Link is not valid', 404);
+
+  // ------ Compare hashed code -------
+  const compareHashStatus = bcrypt.compareSync(
+    user.forgetCode,
+    decoded.hashedCode
+  );
+  if (!compareHashStatus) {
+    return sendError(next, 'Code is not valid', 400);
+  }
+
+  // ------ Update user in database -------
+  user.forgetCode = null;
+  user.password = password;
+
+  const updateUser = await user.save();
+
+  if (!updateUser) {
+    return sendError(next, 'Update user faild!', 400);
+  }
+
+  res.status(201).json({ message: 'Password updated successfully' });
+};
+
 export const refreshToken = async (req, res, next) => {
   const jwtRefreshToken = req.cookies?.jwtRefreshToken;
 
@@ -185,6 +277,8 @@ export const logOut = async (req, res, next) => {
 
   if (!jwtRefreshToken) return sendError(next, 'No content', 204);
 
+  // under middleware to verify exist token or not
+  // TODO: will update status and token in database
   res.clearCookie('jwtRefreshToken', {
     httpOnly: true,
     // secure: true, // For HTTPS

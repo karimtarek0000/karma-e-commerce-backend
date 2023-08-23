@@ -29,3 +29,13 @@ export const signInSchema = {
     password: JOI.string().required(),
   }).required(),
 };
+
+export const resetPasswordSchema = {
+  body: JOI.object({
+    password: JOI.string().regex(
+      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/
+    ),
+  })
+    .required()
+    .options({ presence: 'required' }),
+};

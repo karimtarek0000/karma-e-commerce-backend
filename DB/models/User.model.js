@@ -54,6 +54,7 @@ const userSchema = new Schema(
     },
     forgetCode: {
       type: String,
+      default: null,
     },
     isConfirmed: {
       type: Boolean,
