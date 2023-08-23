@@ -242,34 +242,39 @@ export const resetPassword = async (req, res, next) => {
 export const refreshToken = async (req, res, next) => {
   const jwtRefreshToken = req.cookies?.jwtRefreshToken;
 
+  // ---- Check if refresh token exist ------
   if (!jwtRefreshToken) return sendError(next, 'Refresh token not exist!', 400);
 
-  JWT.verify(
-    jwtRefreshToken,
-    process.env.REFRESH_TOKE_SECRET,
-    async (err, data) => {
-      if (err || !data._id || !data.email) {
-        return sendError(next, 'Unauthorized!', 401);
-      }
+  // ---- Check refresh token valid or not ------
+  const decoded = JWT.verify(jwtRefreshToken, process.env.REFRESH_TOKE_SECRET);
+  if (!decoded.email) {
+    return sendError(next, 'Refresh token is not valid!', 400);
+  }
 
-      const userData = await userModel.findOne({ email: data.email });
+  // ---- Check email exist ------
+  const userData = await userModel.findOne({ email: decoded.email });
 
-      if (!userData) return sendError(next, 'User not found!', 400);
+  if (!userData) return sendError(next, 'User not exist!', 400);
 
-      const { _id, email, name } = userData;
-      const accessToken = JWT.sign(
-        { _id, email, name },
-        process.env.ACCESS_TOKEN_SECRET,
-        {
-          expiresIn: '30s',
-        }
-      );
+  // ---- Generate new access token ------
+  const { _id, name, email, role } = userData;
 
-      res
-        .status(200)
-        .json({ message: 'Refresh token successfully', accessToken });
-    }
+  const accessToken = generateToken({
+    payload: { _id, name, email, role },
+    sign: process.env.ACCESS_TOKEN_SECRET,
+    options: { expiresIn: '15m' },
+  });
+
+  // ---- Adding new access token in user database ------
+  const updateUser = await userModel.findOneAndUpdate(
+    { email },
+    { accessToken },
+    { new: true }
   );
+
+  if (!updateUser) return sendError(next, 'Update user faild', 400);
+
+  res.status(200).json({ message: 'Generate new access token', accessToken });
 };
 
 export const logOut = async (req, res, next) => {
