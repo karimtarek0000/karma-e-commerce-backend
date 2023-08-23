@@ -45,7 +45,7 @@ const subCategorySchema = new Schema(
   }
 );
 
-subCategory.virtual('brands', {
+subCategorySchema.virtual('brands', {
   ref: 'brand',
   foreignField: 'subCategoryId',
   localField: '_id',

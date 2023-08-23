@@ -7,9 +7,23 @@ import { subCategoryModel } from '../../../DB/models/SubCategory.model.js';
 import { brandModel } from '../../../DB/models/Brand.model.js';
 import { productModel } from '../../../DB/models/Product.model.js';
 
+// ------ Get all categories --------
+export const getCategories = async (req, res) => {
+  const categories = await categoryModel.find().populate([
+    {
+      path: 'subCategories',
+      populate: [{ path: 'brands' }],
+    },
+  ]);
+
+  res.status(200).json({ message: 'All categories and sub categories', categories });
+};
+
+// ------ Add new category --------
 export const createNewCategory = async (req, res, next) => {
   const { file } = req;
   const { name } = req.body;
+  const { _id } = req.userData;
 
   const categoryNameExist = await categoryModel.findOne({ name });
 
@@ -20,12 +34,9 @@ export const createNewCategory = async (req, res, next) => {
   const customId = nanoid(20);
   const path = `${process.env.FOLDER_NAME}/categories/${customId}`;
 
-  const { public_id, secure_url } = await cloudinary.uploader.upload(
-    file.path,
-    {
-      folder: path,
-    }
-  );
+  const { public_id, secure_url } = await cloudinary.uploader.upload(file.path, {
+    folder: path,
+  });
 
   // -------------------------- Send fn to catch if happend any error --------------------------
   async function deleteResources() {
@@ -40,6 +51,7 @@ export const createNewCategory = async (req, res, next) => {
     name,
     slug,
     customId,
+    createdBy: _id,
     image: { public_id, secure_url },
   });
 
@@ -47,27 +59,23 @@ export const createNewCategory = async (req, res, next) => {
   if (!categoryData) {
     await deleteResources();
 
-    return sendError(
-      next,
-      'Error happend when create category please try again!',
-      400
-    );
+    return sendError(next, 'Error happend when create category please try again!', 400);
   }
 
-  res
-    .status(201)
-    .json({ message: 'Create category successfully', category: categoryData });
+  res.status(201).json({ message: 'Create category successfully', category: categoryData });
 };
 
+// ------ Update category --------
 export const updateCategory = async (req, res, next) => {
   const { file } = req;
-  const { id, name } = req.body;
+  const { categoryId, name } = req.body;
+  const { _id } = req.userData;
 
   if (!name && !file) {
     return sendError(next, 'No any data found to update', 400);
   }
 
-  const category = await categoryModel.findById(id);
+  const category = await categoryModel.findOne({ _id: categoryId, createdBy: _id });
 
   // Check if category id exist or not
   if (!category) return sendError(next, 'No category found with this id', 400);
@@ -92,26 +100,23 @@ export const updateCategory = async (req, res, next) => {
     await cloudinary.uploader.destroy(category.image.public_id);
 
     // Upload new image
-    const { public_id, secure_url } = await cloudinary.uploader.upload(
-      file.path,
-      {
-        folder: `${process.env.FOLDER_NAME}/categories/${category.customId}`,
-      }
-    );
+    const { public_id, secure_url } = await cloudinary.uploader.upload(file.path, {
+      folder: `${process.env.FOLDER_NAME}/categories/${category.customId}`,
+    });
 
     category.image = { public_id, secure_url };
   }
 
   const categoryData = await category.save();
-  res
-    .status(201)
-    .json({ message: 'Update category successfully', category: categoryData });
+  res.status(201).json({ message: 'Update category successfully', category: categoryData });
 };
 
+// ------ Delete category --------
 export const deleteCategory = async (req, res, next) => {
   const { categoryId } = req.params;
+  const { _id } = req.userData;
 
-  const category = await categoryModel.findByIdAndDelete(categoryId);
+  const category = await categoryModel.findOneAndDelete({ _id: categoryId, createdBy: _id });
 
   if (!category) return sendError(next, 'Category id not correct!', 400);
 
@@ -123,27 +128,15 @@ export const deleteCategory = async (req, res, next) => {
   ]);
 
   if (!subCategory.deletedCount) {
-    return sendError(
-      next,
-      'Error happend while delete subcategories please try again',
-      400
-    );
+    return sendError(next, 'Error happend while delete subcategories please try again', 400);
   }
 
   if (!brand.deletedCount) {
-    return sendError(
-      next,
-      'Error happend while delete brands please try again',
-      400
-    );
+    return sendError(next, 'Error happend while delete brands please try again', 400);
   }
 
   if (!product.deletedCount) {
-    return sendError(
-      next,
-      'Error happend while delete products please try again',
-      400
-    );
+    return sendError(next, 'Error happend while delete products please try again', 400);
   }
 
   // Delete all in folder customId into categories folder and after that delete folder
@@ -152,20 +145,5 @@ export const deleteCategory = async (req, res, next) => {
   await cloudinary.api.delete_resources_by_prefix(path);
   await cloudinary.api.delete_folder(path);
 
-  res
-    .status(200)
-    .json({ message: 'Delete category successfully', status: true });
-};
-
-export const getCategories = async (req, res) => {
-  const categories = await categoryModel.find().populate([
-    {
-      path: 'subCategories',
-      populate: [{ path: 'brands' }],
-    },
-  ]);
-
-  res
-    .status(200)
-    .json({ message: 'All categories and sub categories', categories });
+  res.status(200).json({ message: 'Delete category successfully', status: true });
 };
