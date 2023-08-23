@@ -16,12 +16,7 @@ export const createNewUser = async (req, res, next) => {
     return sendError(next, 'Email already exist please add another email', 400);
   }
 
-  // ---- Encrypt password ------
-  const hashPassword = bcrypt.hashSync(password, +process.env.HASH_LEVEL);
-
-  if (!hashPassword) return sendError(next, 'Error hashing password', 400);
-
-  // ---- Send confirmlink to email user ------
+  // ---- Send confirm link to email user ------
   const token = generateToken({
     payload: {
       name,
@@ -55,7 +50,7 @@ export const createNewUser = async (req, res, next) => {
     email,
     phoneNumber,
     role,
-    password: hashPassword,
+    password,
   });
 
   if (!data) return sendError(next, 'Error saving data in our database', 400);
@@ -73,10 +68,12 @@ export const createNewUser = async (req, res, next) => {
 export const confirmEmail = async (req, res, next) => {
   const { token } = req.params;
 
+  // ------- Verify token -------
   const decoded = JWT.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
   if (!decoded.email) return sendError(next, 'Token not valid', 400);
 
+  // ------- Check if user exist or not -------
   const user = await userModel.findOneAndUpdate(
     { email: decoded.email, isConfirmed: false },
     { isConfirmed: true }

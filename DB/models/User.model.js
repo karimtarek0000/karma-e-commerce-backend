@@ -1,6 +1,7 @@
 import { Schema, model } from 'mongoose';
+import bcrypt from 'bcrypt';
 
-const users = new Schema(
+const userSchema = new Schema(
   {
     name: {
       type: String,
@@ -65,4 +66,10 @@ const users = new Schema(
   }
 );
 
-export const userModel = model('user', users);
+// Hooks
+userSchema.pre('save', function (next) {
+  this.password = bcrypt.hashSync(this.password, +process.env.HASH_LEVEL);
+  next();
+});
+
+export const userModel = model('user', userSchema);

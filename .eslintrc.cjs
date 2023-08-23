@@ -35,5 +35,7 @@ module.exports = {
     'object-curly-newline': ['off'],
     'no-confusing-arrow': ['off'],
     'import/no-extraneous-dependencies': ['off'],
+    'prefer-arrow-callback': ['off'],
+    'func-names': ['off'],
   },
 };
