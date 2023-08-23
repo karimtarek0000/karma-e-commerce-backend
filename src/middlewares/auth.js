@@ -1,33 +1,32 @@
-import JWT from "jsonwebtoken";
-import { sendError } from "../lib/sendError.js";
-import { userModel } from "../../DB/models/User.model.js";
+import JWT from 'jsonwebtoken';
+import { sendError } from '../lib/sendError.js';
+import { userModel } from '../../DB/models/User.model.js';
 
-export const auth = async (req, res, next) => {
-  const accessToken = req.header("Authorization");
+export const isAuth = async (req, res, next) => {
+  try {
+    const accessToken = req.header('Authorization');
 
-  if (accessToken && accessToken.startsWith("Bearer")) {
-    const token = accessToken.split(" ")[1];
+    if (accessToken && accessToken.startsWith('Bearer')) {
+      const token = accessToken.split(' ')[1];
 
-    let userDataFromToken = null;
-    JWT.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, data) => {
-      if (err) return sendError(next, "Unauthorized!", 401);
-      userDataFromToken = data;
-    });
+      // -------- Verify token ----------
+      const userDataFromToken = JWT.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
-    if (userDataFromToken) {
-      const userData = await userModel.findOne({ email: userDataFromToken.email });
+      // ------ If token valid ----------
+      if (userDataFromToken.email) {
+        const { _id, email } = userDataFromToken;
+        const userData = await userModel.findOne({ _id, email }).select('_id name email role');
 
-      if (!userData) return sendError(next, "This user not exist!", 400);
+        if (!userData) return sendError(next, 'This user not exist!', 401);
 
-      const { _id, userName, email } = userData;
-      req.userData = {
-        _id,
-        email,
-        userName,
-      };
-      next();
+        req.userData = userData;
+
+        next();
+      }
+    } else {
+      sendError(next, 'Token not correct!', 401);
     }
-  } else {
-    return sendError(next, "Token not correct!", 400);
+  } catch (error) {
+    return sendError(next, error, 401);
   }
 };

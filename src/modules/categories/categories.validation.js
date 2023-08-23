@@ -1,9 +1,8 @@
 import JOI from 'joi';
-// import { generalValidations } from '../../middlewares/validations.js';
+import { generalValidations } from '../../middlewares/validations.js';
 
 const share = {
   name: JOI.string().trim(),
-  // createdBy: generalValidations._id,
 };
 
 export const categorySchema = {
@@ -15,7 +14,7 @@ export const categorySchema = {
 
 export const updateCategorySchema = {
   body: JOI.object({
-    categoryId: JOI.string().trim().required(),
+    categoryId: generalValidations._id,
     ...share,
   }),
   file: JOI.object(),
