@@ -75,10 +75,7 @@ export const confirmEmail = async (req, res, next) => {
   if (!decoded.email) return sendError(next, 'Token not valid', 400);
 
   // ------- Check if user exist or not -------
-  const user = await userModel.findOneAndUpdate(
-    { email: decoded.email, isConfirmed: false },
-    { isConfirmed: true }
-  );
+  const user = await userModel.findOneAndUpdate({ email: decoded.email, isConfirmed: false }, { isConfirmed: true });
 
   if (!user) return sendError(next, 'User not found', 400);
 
@@ -218,10 +215,7 @@ export const resetPassword = async (req, res, next) => {
   if (!user.forgetCode) return sendError(next, 'Link is not valid', 404);
 
   // ------ Compare hashed code -------
-  const compareHashStatus = bcrypt.compareSync(
-    user.forgetCode,
-    decoded.hashedCode
-  );
+  const compareHashStatus = bcrypt.compareSync(user.forgetCode, decoded.hashedCode);
   if (!compareHashStatus) {
     return sendError(next, 'Code is not valid', 400);
   }
@@ -266,11 +260,7 @@ export const refreshToken = async (req, res, next) => {
   });
 
   // ---- Adding new access token in user database ------
-  const updateUser = await userModel.findOneAndUpdate(
-    { email },
-    { accessToken },
-    { new: true }
-  );
+  const updateUser = await userModel.findOneAndUpdate({ email }, { accessToken }, { new: true });
 
   if (!updateUser) return sendError(next, 'Update user faild', 400);
 
