@@ -1,14 +1,19 @@
 import JOI from 'joi';
+import { generalValidations } from '../../middlewares/validations.js';
 
 export const createCouponSchema = {
   body: JOI.object({
-    couponCode: JOI.string().trim().min(5).max(55).required(),
-    couponAmount: JOI.number().positive().min(1).max(100).required(),
-    couponAmountType: JOI.string().valid('percentage', 'fixed').required(),
-    couponStatus: JOI.string().valid('expired', 'valid'),
-    couponStartDate: JOI.date()
-      .greater(Date.now() - 24 * 60 * 60 * 1000)
-      .required(),
-    couponEndData: JOI.date().greater(JOI.ref('couponStartDate')).required(),
-  }),
+    couponCode: JOI.string().trim().min(5).max(55),
+    couponAmount: JOI.number().positive().min(1).max(100),
+    couponAmountType: JOI.string().valid('percentage', 'fixed').optional(),
+    couponStatus: JOI.string().valid('expired', 'valid').optional(),
+    couponStartDate: JOI.date().greater(Date.now() - 24 * 60 * 60 * 1000),
+    couponEndData: JOI.date().greater(JOI.ref('couponStartDate')),
+    couponAssignToUsers: JOI.array().items({
+      userId: generalValidations._id,
+      maxUsage: JOI.number().default(1).optional(),
+    }),
+  })
+    .required()
+    .options({ presence: 'required' }),
 };
