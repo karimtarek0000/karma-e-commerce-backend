@@ -37,5 +37,6 @@ module.exports = {
     'import/no-extraneous-dependencies': ['off'],
     'prefer-arrow-callback': ['off'],
     'func-names': ['off'],
+    'no-param-reassign': ['off'],
   },
 };
