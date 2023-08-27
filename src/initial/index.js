@@ -9,6 +9,7 @@ import {
   brandsRoutes,
   productsRoutes,
   couponsRoutes,
+  cartRoutes,
 } from './routes.all.js';
 import { changeStatusCoupon } from '../utils/crons.js';
 
@@ -25,6 +26,7 @@ export default function initialProject(app) {
   app.use('/brands', brandsRoutes);
   app.use('/products', productsRoutes);
   app.use('/coupons', couponsRoutes);
+  app.use('/cart', cartRoutes);
   app.use('/auth', authRoutes);
 
   changeStatusCoupon();

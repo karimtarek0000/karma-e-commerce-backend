@@ -4,6 +4,7 @@ import subCategoriesRoutes from '../modules/subCategories/subCategories.routes.j
 import brandsRoutes from '../modules/brands/brands.routes.js';
 import productsRoutes from '../modules/products/products.routes.js';
 import couponsRoutes from '../modules/coupons/coupons.routes.js';
+import cartRoutes from '../modules/cart/cart.routes.js';
 
 export {
   authRoutes,
@@ -12,4 +13,5 @@ export {
   brandsRoutes,
   productsRoutes,
   couponsRoutes,
+  cartRoutes,
 };
