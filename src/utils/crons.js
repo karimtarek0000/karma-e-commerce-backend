@@ -14,6 +14,7 @@ export const changeStatusCoupon = () => {
       await coupon.save();
     });
 
+    // eslint-disable-next-line no-console
     console.log('Cron job is running');
   });
 };

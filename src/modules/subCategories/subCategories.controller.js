@@ -6,12 +6,14 @@ import cloudinary from '../../lib/cloudinary.cloud.js';
 import { sendError } from '../../lib/sendError.js';
 import { brandModel } from '../../../DB/models/Brand.model.js';
 
+// -------------- Get all sub categories --------------
 export const getAllSubCategories = async (req, res) => {
   const subCategories = await subCategoryModel.find();
 
   res.status(200).json({ message: 'All sub categories', subCategories });
 };
 
+// -------------- Create new sub category --------------
 export const createNewSubCategory = async (req, res, next) => {
   const { file } = req;
   const { name, categoryId } = req.body;
@@ -30,12 +32,9 @@ export const createNewSubCategory = async (req, res, next) => {
 
   const customId = nanoid(20);
 
-  const { public_id, secure_url } = await cloudinary.uploader.upload(
-    file.path,
-    {
-      folder: `${process.env.FOLDER_NAME}/categories/${categoryIdExist.customId}/subCategories/${customId}`,
-    }
-  );
+  const { public_id, secure_url } = await cloudinary.uploader.upload(file.path, {
+    folder: `${process.env.FOLDER_NAME}/categories/${categoryIdExist.customId}/subCategories/${customId}`,
+  });
 
   const slug = slugify(name, '_');
   const subCategoryData = await subCategoryModel.create({
@@ -49,11 +48,7 @@ export const createNewSubCategory = async (req, res, next) => {
   // If data not created in database will remove image
   if (!subCategoryData) {
     await cloudinary.uploader.destroy(public_id);
-    return sendError(
-      next,
-      'Error happend when create data please try again!',
-      400
-    );
+    return sendError(next, 'Error happend when create data please try again!', 400);
   }
 
   res.status(201).json({
@@ -62,6 +57,7 @@ export const createNewSubCategory = async (req, res, next) => {
   });
 };
 
+// -------------- Update sub category --------------
 export const updateSubCategory = async (req, res, next) => {
   const { file } = req;
   const { id, name } = req.body;
@@ -70,9 +66,7 @@ export const updateSubCategory = async (req, res, next) => {
     return sendError(next, 'No any data found to update', 400);
   }
 
-  const subCategory = await subCategoryModel
-    .findById(id)
-    .populate([{ path: 'categoryId' }]);
+  const subCategory = await subCategoryModel.findById(id).populate([{ path: 'categoryId' }]);
 
   // Check if category id exist or not
   if (!subCategory) {
@@ -99,12 +93,9 @@ export const updateSubCategory = async (req, res, next) => {
     await cloudinary.uploader.destroy(subCategory.image.public_id);
 
     // Upload new image
-    const { public_id, secure_url } = await cloudinary.uploader.upload(
-      file.path,
-      {
-        folder: `${process.env.FOLDER_NAME}/categories/${subCategory.categoryId.customId}/subCategories/${subCategory.customId}`,
-      }
-    );
+    const { public_id, secure_url } = await cloudinary.uploader.upload(file.path, {
+      folder: `${process.env.FOLDER_NAME}/categories/${subCategory.categoryId.customId}/subCategories/${subCategory.customId}`,
+    });
 
     subCategory.image = { public_id, secure_url };
   }
@@ -116,6 +107,7 @@ export const updateSubCategory = async (req, res, next) => {
   });
 };
 
+// -------------- Delete sub category --------------
 export const deleteSubCategory = async (req, res, next) => {
   const { subCategoryId } = req.params;
 
@@ -133,11 +125,7 @@ export const deleteSubCategory = async (req, res, next) => {
   ]);
 
   if (!subcategory || !brand.deletedCount) {
-    return sendError(
-      next,
-      'Error happend while delete subcategory and brand',
-      400
-    );
+    return sendError(next, 'Error happend while delete subcategory and brand', 400);
   }
 
   // Delete images with folders
@@ -145,7 +133,5 @@ export const deleteSubCategory = async (req, res, next) => {
   await cloudinary.api.delete_resources_by_prefix(path);
   await cloudinary.api.delete_folder(path);
 
-  res
-    .status(200)
-    .json({ message: 'Delete subcategory successfully', status: true });
+  res.status(200).json({ message: 'Delete subcategory successfully', status: true });
 };

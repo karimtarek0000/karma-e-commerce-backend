@@ -9,11 +9,9 @@ import { brandModel } from '../../../DB/models/Brand.model.js';
 import { paginationHandler } from '../../utils/pagination.js';
 import { ApiFeatures } from '../../lib/apiFeatures.js';
 
+// -------------- Get all products --------------
 export const allProducts = async (req, res) => {
-  const { mongooseQuery, limit, page } = new ApiFeatures(
-    productModel.find(),
-    req.query
-  )
+  const { mongooseQuery, limit, page } = new ApiFeatures(productModel.find(), req.query)
     .pagination()
     .sort()
     .select()
@@ -31,6 +29,7 @@ export const allProducts = async (req, res) => {
   });
 };
 
+// -------------- Search on products --------------
 export const searchProducts = async (req, res) => {
   const { title, page, size } = req.query;
 
@@ -49,6 +48,7 @@ export const searchProducts = async (req, res) => {
   });
 };
 
+// -------------- Add new product --------------
 export const addNewProduct = async (req, res, next) => {
   const { files } = req;
 
@@ -92,20 +92,15 @@ export const addNewProduct = async (req, res, next) => {
 
   for (const file of files) {
     // eslint-disable-next-line no-await-in-loop
-    const { public_id, secure_url } = await cloudinary.uploader.upload(
-      file.path,
-      {
-        folder: path,
-      }
-    );
+    const { public_id, secure_url } = await cloudinary.uploader.upload(file.path, {
+      folder: path,
+    });
 
     images.push({ public_id, secure_url });
   }
 
   // Save all data in database
-  const priceAfterDiscount = discount
-    ? price - (price * discount) / 100
-    : price;
+  const priceAfterDiscount = discount ? price - (price * discount) / 100 : price;
 
   const slug = slugify(title, '_');
 
@@ -143,6 +138,7 @@ export const addNewProduct = async (req, res, next) => {
   res.status(201).json({ message: 'Create new product', product });
 };
 
+// -------------- Update product --------------
 export const updateProduct = async (req, res, next) => {
   const { files } = req;
 
@@ -245,10 +241,9 @@ export const updateProduct = async (req, res, next) => {
     // Upload new images
     for (const file of files) {
       // eslint-disable-next-line no-await-in-loop
-      const { public_id, secure_url } = await cloudinary.uploader.upload(
-        file.path,
-        { folder: path }
-      );
+      const { public_id, secure_url } = await cloudinary.uploader.upload(file.path, {
+        folder: path,
+      });
 
       images.push({ public_id, secure_url });
       publicIds.push(public_id);
@@ -269,15 +264,13 @@ export const updateProduct = async (req, res, next) => {
 
   if (!newProduct) {
     await cloudinary.api.delete_resources(publicIds);
-    return sendError(
-      next,
-      'Error happend while save product, please try again'
-    );
+    return sendError(next, 'Error happend while save product, please try again');
   }
 
   res.status(200).json({ message: 'Update product successfully', newProduct });
 };
 
+// -------------- Delete product --------------
 export const deleteProduct = async (req, res, next) => {
   const { productId } = req.params;
 
@@ -303,7 +296,5 @@ export const deleteProduct = async (req, res, next) => {
   await cloudinary.api.delete_resources_by_prefix(path);
   await cloudinary.api.delete_folder(path);
 
-  res
-    .status(200)
-    .json({ message: 'Delete products successfully', status: true });
+  res.status(200).json({ message: 'Delete products successfully', status: true });
 };

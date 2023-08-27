@@ -6,12 +6,14 @@ import cloudinary from '../../lib/cloudinary.cloud.js';
 import { sendError } from '../../lib/sendError.js';
 import { brandModel } from '../../../DB/models/Brand.model.js';
 
+// -------------- Get all brands --------------
 export const getAllBrands = async (req, res) => {
   const brands = await brandModel.find();
 
   res.status(200).json({ message: 'All brands', brands });
 };
 
+// -------------- Add new brand --------------
 export const addNewBrand = async (req, res, next) => {
   const { file } = req;
   const { name, categoryId, subCategoryId } = req.body;
@@ -24,12 +26,9 @@ export const addNewBrand = async (req, res, next) => {
   }
 
   const customId = nanoid(20);
-  const { public_id, secure_url } = await cloudinary.uploader.upload(
-    file.path,
-    {
-      folder: `${process.env.FOLDER_NAME}/categories/${category.customId}/subCategories/${subCategory.customId}/brands/${customId}`,
-    }
-  );
+  const { public_id, secure_url } = await cloudinary.uploader.upload(file.path, {
+    folder: `${process.env.FOLDER_NAME}/categories/${category.customId}/subCategories/${subCategory.customId}/brands/${customId}`,
+  });
 
   const slug = slugify(name, '_');
 
@@ -50,6 +49,7 @@ export const addNewBrand = async (req, res, next) => {
   res.status(201).json({ message: 'Create new brand', brand });
 };
 
+// -------------- Update brand --------------
 export const updateBrand = async (req, res, next) => {
   const { file } = req;
   const { id, name } = req.body;
@@ -81,12 +81,9 @@ export const updateBrand = async (req, res, next) => {
     await cloudinary.uploader.destroy(brand.image.public_id);
 
     // Upload new image
-    const { public_id, secure_url } = await cloudinary.uploader.upload(
-      file.path,
-      {
-        folder: `${process.env.FOLDER_NAME}/categories/${brand.categoryId.customId}/subCategories/${brand.subCategoryId.customId}/brands/${brand.customId}`,
-      }
-    );
+    const { public_id, secure_url } = await cloudinary.uploader.upload(file.path, {
+      folder: `${process.env.FOLDER_NAME}/categories/${brand.categoryId.customId}/subCategories/${brand.subCategoryId.customId}/brands/${brand.customId}`,
+    });
 
     brand.image = { public_id, secure_url };
   }
@@ -99,6 +96,7 @@ export const updateBrand = async (req, res, next) => {
   });
 };
 
+// -------------- Delete brand --------------
 export const deleteBrand = async (req, res, next) => {
   const { brandId } = req.body;
 
@@ -119,11 +117,7 @@ export const deleteBrand = async (req, res, next) => {
   const brandDeleted = await brandModel.deleteOne({ _id: brandId });
 
   if (!brandDeleted.deletedCount) {
-    return sendError(
-      next,
-      'Error happend while delete brand please try again',
-      400
-    );
+    return sendError(next, 'Error happend while delete brand please try again', 400);
   }
 
   // Delete brand image

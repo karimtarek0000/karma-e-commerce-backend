@@ -121,7 +121,7 @@ export const deleteCategory = async (req, res, next) => {
   if (!category) return sendError(next, 'Category id not correct!', 400);
 
   // Delete subcategory and brand
-  const [subCategory, brand, product] = await Promise.all([
+  await Promise.all([
     subCategoryModel.deleteMany({ categoryId }),
     brandModel.deleteMany({ categoryId }),
     productModel.deleteMany({ categoryId }),
