@@ -19,20 +19,31 @@ export const addProductInCart = async (req, res, next) => {
     let isProductExist = false;
 
     for (const product of userCart.products) {
-      if (product.product == productId) {
+      if (product.productId == productId) {
         isProductExist = true;
         product.quantity = quantity;
       }
     }
 
     if (!isProductExist) {
-      userCart.products.push({ product: productId, quantity });
+      userCart.products.push({ productId, quantity });
     }
+
+    // ---------- Subtotal ----------
+    const productPromises = userCart.products.map(async (product) => {
+      const { priceAfterDiscount } = await productModel.findById(product.productId);
+      return priceAfterDiscount * product.quantity || 0;
+    });
+
+    const subTotalArray = await Promise.all(productPromises);
+
+    const subTotal = subTotalArray.reduce((prev, cur) => prev + cur, 0);
 
     const updateCart = await cartModel.findOneAndUpdate(
       { userId },
       {
         products: userCart.products,
+        subTotal,
       },
       { new: true }
     );
@@ -45,11 +56,44 @@ export const addProductInCart = async (req, res, next) => {
   // ----------------- Create new cart ----------------
   const newCart = await cartModel.create({
     userId,
-    products: { product: productId, quantity },
-    subTotal: productExist.priceAfterDiscount,
+    products: { productId, quantity },
+    subTotal: productExist.priceAfterDiscount * quantity,
   });
 
   if (!newCart) return sendError(next, 'Add cart faild', 400);
 
-  res.status(201).json({ message: 'Product added in cart successfully', newCart });
+  res.status(201).json({ message: 'New cart created successfully', newCart });
+};
+
+// --------------- Delete product from cart ---------------
+export const deleteProductFromCart = async (req, res, next) => {
+  const userId = req.userData._id;
+  const { productId } = req.params;
+
+  // ----------- Check if product exist ----------------
+  const cart = await cartModel.findOne({
+    userId,
+    'products.productId': productId,
+  });
+
+  if (!cart) return sendError(next, 'Porduct not exist in cart', 400);
+
+  // ----------- Delete product from cart and update subtotal ----------------
+  const productData = await productModel.findById(productId);
+
+  if (!productData) return sendError(next, 'Delete product faild', 400);
+
+  cart.products.forEach((product, i, products) => {
+    if (product.productId == productId) {
+      products.splice(i, 1);
+      cart.subTotal -= productData.priceAfterDiscount * product.quantity;
+    }
+  });
+
+  // ----------- Save all updates in database ----------------
+  const updateCart = await cart.save();
+
+  if (!updateCart) return sendError(next, 'Delete product faild', 400);
+
+  res.status(200).json({ message: 'Product deleted successfully', updateCart });
 };

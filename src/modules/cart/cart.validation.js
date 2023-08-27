@@ -9,3 +9,11 @@ export const addCartSchema = {
     .required()
     .options({ presence: 'required' }),
 };
+
+export const deleteCartSchema = {
+  params: JOI.object({
+    productId: generalValidations._id,
+  })
+    .required()
+    .options({ presence: 'required' }),
+};
