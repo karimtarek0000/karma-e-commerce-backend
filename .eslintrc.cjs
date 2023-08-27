@@ -38,5 +38,6 @@ module.exports = {
     'prefer-arrow-callback': ['off'],
     'func-names': ['off'],
     'no-param-reassign': ['off'],
+    eqeqeq: ['off'],
   },
 };
