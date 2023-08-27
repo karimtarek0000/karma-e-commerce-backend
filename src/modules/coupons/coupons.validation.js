@@ -17,3 +17,9 @@ export const createCouponSchema = {
     .required()
     .options({ presence: 'required' }),
 };
+
+export const deleteCouponSchema = {
+  params: JOI.object({ couponId: generalValidations._id })
+    .required()
+    .options({ presence: 'required' }),
+};

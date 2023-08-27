@@ -46,3 +46,15 @@ export const createCoupon = async (req, res, next) => {
 
   res.status(201).json({ message: 'Create new coupon', newCoupon });
 };
+
+// --------- Delete coupon ----------
+export const deleteCoupon = async (req, res, next) => {
+  const { couponId } = req.params;
+  const { _id } = req.userData;
+
+  const coupon = await couponModel.findOneAndDelete({ _id: couponId, createdBy: _id });
+
+  if (!coupon) return sendError(next, 'Coupon not exist!', 400);
+
+  res.status(201).json({ message: 'Coupon deleted successfully' });
+};
