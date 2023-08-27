@@ -10,6 +10,7 @@ import {
   productsRoutes,
   couponsRoutes,
 } from './routes.all.js';
+import { changeStatusCoupon } from '../utils/crons.js';
 
 export default function initialProject(app) {
   // Middleware for cookies parsing
@@ -26,18 +27,18 @@ export default function initialProject(app) {
   app.use('/coupons', couponsRoutes);
   app.use('/auth', authRoutes);
 
+  changeStatusCoupon();
+
   // 404 ( Not Found )
-  app.use('*', (_, res) =>
-    res.status(404).json({ message: 'This route not found' })
-  );
+  app.use('*', (_, res) => res.status(404).json({ message: 'This route not found' }));
 
   // Apply Error
   app.use((err, req, res, next) => {
-    if (err) return res.status(err.cause || 400).json({ message: err.message });
+    if (err) {
+      return res.status(err.cause || 400).json({ message: req.validationErrors || err.message });
+    }
   });
 
   // Server connection
-  app.listen(+process.env.PORT, () =>
-    console.log('Server listening on port 3000')
-  );
+  app.listen(+process.env.PORT, () => console.log('Server listening on port 3000'));
 }
