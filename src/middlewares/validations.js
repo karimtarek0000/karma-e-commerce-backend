@@ -1,5 +1,6 @@
 import { Types } from 'mongoose';
 import JOI from 'joi';
+import { sendError } from '../lib/sendError.js';
 
 const placesData = ['body', 'params', 'query', 'file', 'files'];
 
@@ -23,18 +24,15 @@ export const validationCore = (schema) => (req, res, next) => {
       });
 
       if (resultValidation.error) {
-        const errors = resultValidation.error.details.map(
-          (error) => error.message
-        );
+        const errors = resultValidation.error.details.map((error) => error.message);
         validationErrors.push({ [key]: errors });
       }
     }
   }
 
   if (validationErrors.length) {
-    return res
-      .status(400)
-      .json({ status: 'Validation Error', validationErrors });
+    req.validationErrors = validationErrors;
+    return sendError(next, validationErrors, 400);
   }
 
   next();
