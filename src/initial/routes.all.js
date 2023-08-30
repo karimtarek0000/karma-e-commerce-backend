@@ -5,6 +5,7 @@ import brandsRoutes from '../modules/brands/brands.routes.js';
 import productsRoutes from '../modules/products/products.routes.js';
 import couponsRoutes from '../modules/coupons/coupons.routes.js';
 import cartRoutes from '../modules/cart/cart.routes.js';
+import orderRoutes from '../modules/order/order.routes.js';
 
 export {
   authRoutes,
@@ -14,4 +15,5 @@ export {
   productsRoutes,
   couponsRoutes,
   cartRoutes,
+  orderRoutes,
 };

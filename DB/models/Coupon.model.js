@@ -48,6 +48,10 @@ const couponSchema = new Schema(
           default: 1,
           required: true,
         },
+        usageCount: {
+          type: Number,
+          default: 0,
+        },
       },
     ],
     couponStartDate: {
