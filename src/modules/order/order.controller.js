@@ -3,7 +3,7 @@ import { productModel } from '../../../DB/models/Product.model.js';
 import { sendError } from '../../lib/sendError.js';
 import { isCouponValid } from '../../utils/couponValidations.js';
 
-// --------------- Add product in cart ---------------
+// --------------- Create order ---------------
 export const createOrder = async (req, res, next) => {
   const userId = req.userData._id;
   const { productId, quantity, address, phoneNumber, paymentMethod, couponCode } = req.body;
