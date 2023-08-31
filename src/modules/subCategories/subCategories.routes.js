@@ -10,12 +10,13 @@ import {
 import { validationCore } from '../../middlewares/validations.js';
 import { subCategorySchema, updateSubCategorySchema } from './subCategories.validation.js';
 import { uploadFilesWithCloud, allowExtensionsTypes } from '../../services/uploadFiles.cloud.js';
+import { systemRoles } from '../../utils/systemRoles.js';
 
 const router = Router();
 
 router
   .get('/', errorHandler(getAllSubCategories))
-  .use(isAuth)
+  .use(isAuth([systemRoles.ADMIN, systemRoles.SUPERADMIN]))
   .post(
     '/',
     uploadFilesWithCloud(allowExtensionsTypes.image).single('subCategory', 1),
