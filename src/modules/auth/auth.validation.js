@@ -1,4 +1,5 @@
 import JOI from 'joi';
+import { systemRoles } from '../../utils/systemRoles.js';
 
 export const newUserSchema = {
   body: JOI.object({
@@ -10,10 +11,8 @@ export const newUserSchema = {
         'any.required': 'Email is required',
       }),
     phoneNumber: JOI.string().trim().min(11).max(11),
-    password: JOI.string().regex(
-      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/
-    ),
-    role: JOI.string().valid('Buyer', 'Trader', 'Admin', 'SuperAdmin'),
+    password: JOI.string().regex(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/),
+    role: JOI.string().valid(Object.values(systemRoles).join(', ')),
   }).options({ presence: 'required' }),
 };
 
@@ -32,9 +31,7 @@ export const signInSchema = {
 
 export const resetPasswordSchema = {
   body: JOI.object({
-    password: JOI.string().regex(
-      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/
-    ),
+    password: JOI.string().regex(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/),
   })
     .required()
     .options({ presence: 'required' }),

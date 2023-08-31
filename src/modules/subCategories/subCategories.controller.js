@@ -17,6 +17,7 @@ export const getAllSubCategories = async (req, res) => {
 export const createNewSubCategory = async (req, res, next) => {
   const { file } = req;
   const { name, categoryId } = req.body;
+  const userId = req.userData._id;
 
   const categoryIdExist = await categoryModel.findById(categoryId);
 
@@ -43,6 +44,7 @@ export const createNewSubCategory = async (req, res, next) => {
     customId,
     image: { public_id, secure_url },
     categoryId: categoryIdExist._id,
+    createdBy: userId,
   });
 
   // If data not created in database will remove image

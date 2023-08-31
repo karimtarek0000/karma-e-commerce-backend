@@ -17,6 +17,7 @@ export const getAllBrands = async (req, res) => {
 export const addNewBrand = async (req, res, next) => {
   const { file } = req;
   const { name, categoryId, subCategoryId } = req.body;
+  const userId = req.userData._id;
 
   const category = await categoryModel.findById(categoryId);
   const subCategory = await subCategoryModel.findById(subCategoryId);
@@ -38,6 +39,7 @@ export const addNewBrand = async (req, res, next) => {
     categoryId,
     subCategoryId,
     customId,
+    createdBy: userId,
     image: { public_id, secure_url },
   });
 

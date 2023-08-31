@@ -2,7 +2,7 @@ import JWT from 'jsonwebtoken';
 import { sendError } from '../lib/sendError.js';
 import { userModel } from '../../DB/models/User.model.js';
 
-export const isAuth = async (req, res, next) => {
+export const isAuth = (roles) => async (req, res, next) => {
   try {
     const accessToken = req.header('Authorization');
 
@@ -18,6 +18,10 @@ export const isAuth = async (req, res, next) => {
         const userData = await userModel.findOne({ _id, email }).select('_id name email role');
 
         if (!userData) return sendError(next, 'This user not exist!', 401);
+
+        if (!roles?.includes(userData.role)) {
+          return sendError(next, 'Unauthorized to access API', 403);
+        }
 
         req.userData = userData;
 

@@ -1,5 +1,6 @@
 import { Schema, model } from 'mongoose';
 import bcrypt from 'bcrypt';
+import { systemRoles } from '../../src/utils/systemRoles.js';
 
 const userSchema = new Schema(
   {
@@ -31,9 +32,10 @@ const userSchema = new Schema(
     role: {
       type: String,
       enum: {
-        values: ['Buyer', 'Trader', 'Admin', 'SuperAdmin'],
+        values: Object.values(systemRoles),
         message: '{Value} is not a valid role',
       },
+      default: systemRoles.USER,
       required: true,
     },
     status: {

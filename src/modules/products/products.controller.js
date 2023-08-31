@@ -51,6 +51,7 @@ export const searchProducts = async (req, res) => {
 // -------------- Add new product --------------
 export const addNewProduct = async (req, res, next) => {
   const { files } = req;
+  const userId = req.userData._id;
 
   const {
     title,
@@ -128,6 +129,7 @@ export const addNewProduct = async (req, res, next) => {
     images,
     colors,
     sizes,
+    createdBy: userId,
   });
 
   if (!product) {
