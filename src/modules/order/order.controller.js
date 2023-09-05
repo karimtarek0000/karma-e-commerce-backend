@@ -1,9 +1,11 @@
+import fs from 'fs';
 import { nanoid } from 'nanoid';
+import { cartModel } from '../../../DB/models/Cart.model.js';
 import { orderModel } from '../../../DB/models/Order.model.js';
 import { productModel } from '../../../DB/models/Product.model.js';
 import { sendError } from '../../lib/sendError.js';
+import { sendEmailService } from '../../services/sendEmail.js';
 import { isCouponValid } from '../../utils/couponValidations.js';
-import { cartModel } from '../../../DB/models/Cart.model.js';
 import createInvoice from '../../utils/pdfkit.js';
 
 // --------------- Create order ---------------
@@ -84,7 +86,7 @@ export const createOrder = async (req, res, next) => {
 
 // --------------- Convert cart to order ---------------
 export const cartToOrder = async (req, res, next) => {
-  const { _id: userId, name: userName } = req.userData;
+  const { _id: userId, name: userName, email } = req.userData;
   const { cartId } = req.params;
   const { address, phoneNumber, paymentMethod, couponCode } = req.body;
 
@@ -172,7 +174,7 @@ export const cartToOrder = async (req, res, next) => {
   await cart.save();
 
   // ---- Generate invoice PDF ------
-  const orderCode = `${userName}_${nanoid(5)}`;
+  const orderCode = `${userName}_${nanoid(5)}.pdf`;
   const invoice = {
     orderCode,
     items: order.products,
@@ -183,6 +185,17 @@ export const cartToOrder = async (req, res, next) => {
   };
 
   createInvoice(invoice, orderCode);
+
+  // ---- Send invoice PDF to user via his email ------
+  await sendEmailService({
+    to: email,
+    subject: 'Order confirmation',
+    message: 'Please find your invoice order pdf below',
+    attachments: [{ path: `./Files/${orderCode}` }],
+  });
+
+  // ---------- Delete invoice after sended to email ----------
+  fs.unlinkSync(`./Files/${orderCode}`);
 
   res.status(201).json({ message: 'Cart converted to order successfully', order });
 };
