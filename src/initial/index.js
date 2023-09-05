@@ -44,5 +44,5 @@ export default function initialProject(app) {
   });
 
   // Server connection
-  app.listen(+process.env.PORT, () => console.log('Server listening on port 3000'));
+  app.listen(+process.env.PORT || 4000, () => console.log('Server listening on port 3000'));
 }
