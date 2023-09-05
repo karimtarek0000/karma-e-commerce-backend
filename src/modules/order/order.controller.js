@@ -1,8 +1,10 @@
+import { nanoid } from 'nanoid';
 import { orderModel } from '../../../DB/models/Order.model.js';
 import { productModel } from '../../../DB/models/Product.model.js';
 import { sendError } from '../../lib/sendError.js';
 import { isCouponValid } from '../../utils/couponValidations.js';
 import { cartModel } from '../../../DB/models/Cart.model.js';
+import createInvoice from '../../utils/pdfkit.js';
 
 // --------------- Create order ---------------
 export const createOrder = async (req, res, next) => {
@@ -82,7 +84,7 @@ export const createOrder = async (req, res, next) => {
 
 // --------------- Convert cart to order ---------------
 export const cartToOrder = async (req, res, next) => {
-  const userId = req.userData._id;
+  const { _id: userId, name: userName } = req.userData;
   const { cartId } = req.params;
   const { address, phoneNumber, paymentMethod, couponCode } = req.body;
 
@@ -168,6 +170,19 @@ export const cartToOrder = async (req, res, next) => {
   cart.products = [];
   cart.subTotal = 0;
   await cart.save();
+
+  // ---- Generate invoice PDF ------
+  const orderCode = `${userName}_${nanoid(5)}`;
+  const invoice = {
+    orderCode,
+    items: order.products,
+    subTotal: order.subTotal,
+    paidAmount: order.paidAmount,
+    date: order.createdAt,
+    shipping: { name: userName, address, city: 'cairo', country: 'Egypt' },
+  };
+
+  createInvoice(invoice, orderCode);
 
   res.status(201).json({ message: 'Cart converted to order successfully', order });
 };

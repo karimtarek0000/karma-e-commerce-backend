@@ -7,6 +7,7 @@ import {
   addNewProduct,
   allProducts,
   deleteProduct,
+  getProduct,
   searchProducts,
   updateProduct,
 } from './products.controller.js';
@@ -17,6 +18,7 @@ const router = Router();
 
 router
   .get('/', errorHandler(allProducts))
+  .get('/:productId', errorHandler(getProduct))
   .get('/search', errorHandler(searchProducts))
   .use(isAuth([systemRoles.ADMIN, systemRoles.SUPERADMIN]))
   .post(

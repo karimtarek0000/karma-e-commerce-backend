@@ -75,7 +75,10 @@ export const confirmEmail = async (req, res, next) => {
   if (!decoded.email) return sendError(next, 'Token not valid', 400);
 
   // ------- Check if user exist or not -------
-  const user = await userModel.findOneAndUpdate({ email: decoded.email, isConfirmed: false }, { isConfirmed: true });
+  const user = await userModel.findOneAndUpdate(
+    { email: decoded.email, isConfirmed: false },
+    { isConfirmed: true }
+  );
 
   if (!user) return sendError(next, 'User not found', 400);
 
@@ -117,7 +120,7 @@ export const signIn = async (req, res, next) => {
   const refreshToken = generateToken({
     payload,
     sign: process.env.REFRESH_TOKE_SECRET,
-    options: { expiresIn: '7d' },
+    options: { expiresIn: '10d' },
   });
 
   // ---- Adding refresh token in cookies ----
@@ -125,7 +128,7 @@ export const signIn = async (req, res, next) => {
     httpOnly: true,
     // secure: true, // For HTTPS
     // sameSite: "None", // For CORS
-    maxAge: 120 * 60 * 60 * 1000,
+    maxAge: 10 * 24 * 60 * 60 * 1000,
   });
 
   // ---- Finally adding access token and update status ----

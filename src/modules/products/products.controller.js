@@ -29,6 +29,16 @@ export const allProducts = async (req, res) => {
   });
 };
 
+// -------------- Get product --------------
+export const getProduct = async (req, res, next) => {
+  const { productId } = req.params;
+
+  const product = await productModel.findById(productId);
+
+  if (!product) return sendError(next, 'Product id not correct!', 400);
+
+  res.status(200).json({ message: 'Product', product });
+};
 // -------------- Search on products --------------
 export const searchProducts = async (req, res) => {
   const { title, page, size } = req.query;

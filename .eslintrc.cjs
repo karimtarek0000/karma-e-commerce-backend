@@ -39,5 +39,6 @@ module.exports = {
     'func-names': ['off'],
     'no-param-reassign': ['off'],
     eqeqeq: ['off'],
+    'no-use-before-define': ['off'],
   },
 };

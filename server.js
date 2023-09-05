@@ -10,7 +10,14 @@ config();
 const app = express();
 
 // Cors
-app.use(cors());
+// TODO: will remove it just development
+const corsOptions = {
+  origin: 'http://localhost:3001',
+  credentials: true,
+  optionsSuccessStatus: 200,
+};
+
+app.use(cors(corsOptions));
 
 // Middleware for body parsing
 app.use(express.json());
