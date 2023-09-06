@@ -1,13 +1,12 @@
 import { nanoid } from 'nanoid';
 import slugify from 'slugify';
-import { productModel } from '../../../DB/models/Product.model.js';
-import { sendError } from '../../lib/sendError.js';
-import { categoryModel } from '../../../DB/models/Category.model.js';
-import cloudinary from '../../lib/cloudinary.cloud.js';
-import { subCategoryModel } from '../../../DB/models/SubCategory.model.js';
 import { brandModel } from '../../../DB/models/Brand.model.js';
-import { paginationHandler } from '../../utils/pagination.js';
+import { categoryModel } from '../../../DB/models/Category.model.js';
+import { productModel } from '../../../DB/models/Product.model.js';
+import { subCategoryModel } from '../../../DB/models/SubCategory.model.js';
 import { ApiFeatures } from '../../lib/apiFeatures.js';
+import cloudinary from '../../lib/cloudinary.cloud.js';
+import { sendError } from '../../lib/sendError.js';
 
 // -------------- Get all products --------------
 export const allProducts = async (req, res) => {
@@ -38,24 +37,6 @@ export const getProduct = async (req, res, next) => {
   if (!product) return sendError(next, 'Product id not correct!', 400);
 
   res.status(200).json({ message: 'Product', product });
-};
-// -------------- Search on products --------------
-export const searchProducts = async (req, res) => {
-  const { title, page, size } = req.query;
-
-  const { limit, skip } = paginationHandler(page, size);
-
-  const products = await productModel
-    .find({ title: { $regex: title, $options: 'i' } })
-    .limit(limit)
-    .skip(skip);
-
-  res.status(200).json({
-    message: 'Search for products',
-    page: +page || 1,
-    limit: +limit,
-    products,
-  });
 };
 
 // -------------- Add new product --------------
