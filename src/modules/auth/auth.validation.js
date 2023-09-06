@@ -12,7 +12,7 @@ export const newUserSchema = {
       }),
     phoneNumber: JOI.string().trim().min(11).max(11),
     password: JOI.string().regex(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/),
-    role: JOI.string().valid(Object.values(systemRoles).join(', ')),
+    role: JOI.string().valid(...Object.values(systemRoles)),
   }).options({ presence: 'required' }),
 };
 
