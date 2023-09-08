@@ -6,17 +6,23 @@ import { sendError } from '../../lib/sendError.js';
 import { subCategoryModel } from '../../../DB/models/SubCategory.model.js';
 import { brandModel } from '../../../DB/models/Brand.model.js';
 import { productModel } from '../../../DB/models/Product.model.js';
+import { ApiFeatures } from '../../lib/apiFeatures.js';
 
 // ------ Get all categories --------
-export const getCategories = async (req, res) => {
-  const categories = await categoryModel.find().populate([
-    {
-      path: 'subCategories',
-      populate: [{ path: 'brands' }],
-    },
-  ]);
+export const getAllCategories = async (req, res) => {
+  const { mongooseQuery } = new ApiFeatures(
+    categoryModel.find().populate([
+      {
+        path: 'subCategories',
+        populate: [{ path: 'brands' }],
+      },
+    ]),
+    req.query
+  ).filter();
 
-  res.status(200).json({ message: 'All categories and sub categories', categories });
+  const categories = await mongooseQuery;
+
+  res.status(200).json({ message: 'All categories with sub categories and brands', categories });
 };
 
 // ------ Add new category --------
