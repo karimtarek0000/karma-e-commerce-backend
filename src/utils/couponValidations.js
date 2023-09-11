@@ -25,7 +25,7 @@ export const isCouponValid = async ({ couponCode, userId, next }) => {
 
   // ------------ If user exceeded max usage --------------
   if (userExist.usageCount === userExist.maxUsage) {
-    return sendError(next, 'Exceeded limit for usage this coupon', 400);
+    return sendError(next, 'Exceeded max usage for this coupon', 400);
   }
 
   return { status: true, coupon };
