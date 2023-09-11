@@ -14,13 +14,18 @@ export const isCouponValid = async ({ couponCode, userId, next }) => {
   }
 
   // --------- Check assign users --------------------
-  for (const user of coupon.couponAssignToUsers) {
-    if (userId.toString() !== user.userId.toString()) {
-      return sendError(next, 'This user not assigned to this coupon', 400);
-    }
-    if (user.usageCount === user.maxUsage) {
-      return sendError(next, 'Exceeded limit for usage this coupon', 400);
-    }
+  const userExist = coupon.couponAssignToUsers.find(
+    (user) => user.userId.toString() === userId.toString()
+  );
+
+  // ------------ If user not assigned --------------
+  if (!userExist) {
+    return sendError(next, 'This user not assigned to this coupon', 400);
+  }
+
+  // ------------ If user exceeded max usage --------------
+  if (userExist.usageCount === userExist.maxUsage) {
+    return sendError(next, 'Exceeded limit for usage this coupon', 400);
   }
 
   return { status: true, coupon };
