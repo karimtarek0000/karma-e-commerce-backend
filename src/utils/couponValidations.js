@@ -8,11 +8,15 @@ export const isCouponValid = async ({ couponCode, userId, next }) => {
   // --------- Check if coupon code exist or not --------------------
   if (!coupon) return sendError(next, 'Coupon code not valid', 400);
 
-  // --------- Check status coupon --------------------
-  if (coupon.couponStatus === 'expired' || moment(coupon.couponEndData).isBefore(moment())) {
+  // --------- Check status coupon expired --------------------
+  if (
+    coupon.couponStatus === 'expired' ||
+    moment(new Date(coupon.couponEndData)).isBefore(moment())
+  ) {
     return sendError(next, 'Coupon expired', 400);
   }
-  if (coupon.couponStatus === 'valid' && moment().isBefore(coupon.couponStartDate)) {
+  // --------- Check status coupon valid and date not started yet --------------------
+  if (coupon.couponStatus === 'valid' && moment().isBefore(new Date(coupon.couponStartDate))) {
     return sendError(next, 'Coupon not started yet', 400);
   }
 

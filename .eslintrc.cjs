@@ -40,5 +40,6 @@ module.exports = {
     'no-param-reassign': ['off'],
     eqeqeq: ['off'],
     'no-use-before-define': ['off'],
+    'operator-linebreak': ['off'],
   },
 };
