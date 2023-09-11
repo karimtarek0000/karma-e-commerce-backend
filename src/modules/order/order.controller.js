@@ -14,7 +14,7 @@ import { paymentIntegration } from '../../services/payment.js';
 
 // --------------- Create order ---------------
 export const createOrder = async (req, res, next) => {
-  const userId = req.userData._id;
+  const { _id: userId, email } = req.userData;
   const { productId, quantity, address, phoneNumber, paymentMethod, couponCode } = req.body;
 
   // ---------- Check for coupon ---------------
@@ -69,6 +69,61 @@ export const createOrder = async (req, res, next) => {
 
   if (!order) return sendError(next, 'Order faild', 400);
 
+  // ---- Payment ------
+  let orderSession = null;
+  if (order.paymentMethod === 'card') {
+    // ---------------- If coupon exist will create a coupon for stripe ----------------
+    if (couponResult?.coupon) {
+      const { couponAmount } = couponResult.coupon;
+      let coupon = null;
+
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+      // ------------- If coupon `percentage` -----------------
+      if (couponAmountType === 'percentage') {
+        coupon = await stripe.coupons.create({
+          percent_off: couponAmount,
+        });
+      }
+      // ------------- If coupon `fixed` -----------------
+      if (couponAmountType === 'fixed') {
+        coupon = await stripe.coupons.create({
+          amount_off: couponAmount * 100,
+          currency: 'EGP',
+        });
+      }
+
+      couponResult.coupon.couponId = coupon.id;
+    }
+
+    const token = generateToken({
+      payload: {
+        orderId: order._id,
+        userId: order.userId,
+      },
+      sign: process.env.ORDER_TOKEN_SECRET,
+      options: { expiresIn: '10m' },
+    });
+
+    orderSession = await paymentIntegration({
+      payment_method_types: ['card'],
+      mode: 'payment',
+      customer_email: email,
+      metadata: { orderId: order._id.toString() },
+      discounts: couponResult?.coupon ? [{ coupon: couponResult?.coupon?.couponId }] : [],
+      success_url: `${req.protocol}://${req.headers.host}/order/successOrder?token=${token}`,
+      cancel_url: `${req.protocol}://${req.headers.host}/order/cancelOrder?token=${token}`,
+      line_items: order?.products.map((product) => ({
+        price_data: {
+          currency: 'EGP',
+          product_data: { name: product.title },
+          unit_amount: product.price * 100,
+        },
+        quantity: product.quantity,
+      })),
+    });
+  }
+
   // ---- Increase usage count for coupon user ------
   if (couponResult?.coupon) {
     for (const user of couponResult.coupon.couponAssignToUsers || []) {
@@ -85,7 +140,18 @@ export const createOrder = async (req, res, next) => {
     { $inc: { stock: -parseInt(quantity, 10) } }
   );
 
-  res.status(201).json({ message: 'Created order successfully', order });
+  // ---- Generate qrCode ------
+  const orderQrCode = await generateQrCode({
+    id: order._id,
+    products: order.products,
+  });
+
+  res.status(201).json({
+    message: 'Created order successfully',
+    order,
+    orderQrCode,
+    checkOutURL: orderSession.url,
+  });
 };
 
 // --------------- Convert cart to order ---------------
@@ -263,7 +329,7 @@ export const cartToOrder = async (req, res, next) => {
   fs.unlinkSync(`./Files/${orderCode}`);
 
   res.status(201).json({
-    message: 'Order successfully',
+    message: 'Created order successfully',
     order,
     orderQrCode,
     checkOutURL: orderSession?.url,
