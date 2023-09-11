@@ -28,3 +28,11 @@ export const cartToOrderSchema = {
     cartId: generalValidations._id,
   }).required(),
 };
+
+export const successOrderSchema = {
+  query: JOI.object({
+    token: JOI.string(),
+  })
+    .required()
+    .options({ presence: 'required' }),
+};

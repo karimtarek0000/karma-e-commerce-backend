@@ -1,5 +1,6 @@
 import fs from 'fs';
 import { nanoid } from 'nanoid';
+import JWT from 'jsonwebtoken';
 import Stripe from 'stripe';
 import { cartModel } from '../../../DB/models/Cart.model.js';
 import { orderModel } from '../../../DB/models/Order.model.js';
@@ -11,6 +12,7 @@ import createInvoice from '../../utils/pdfkit.js';
 import { generateQrCode } from '../../utils/qrCode.js';
 import { generateToken } from '../../utils/useToken.js';
 import { paymentIntegration } from '../../services/payment.js';
+import { couponModel } from '../../../DB/models/Coupon.model.js';
 
 // --------------- Create order ---------------
 export const createOrder = async (req, res, next) => {
@@ -334,4 +336,65 @@ export const cartToOrder = async (req, res, next) => {
     orderQrCode,
     checkOutURL: orderSession?.url,
   });
+};
+
+// --------------- Success order ---------------
+export const successOrderPayment = async (req, res, next) => {
+  const { token } = req.query;
+
+  // --------------- Verfiy token if valid or not ---------------
+  const orderData = JWT.verify(token, process.env.ORDER_TOKEN_SECRET);
+
+  // --------------- Check if order id match order in database or not ---------------
+  const orderExist = await orderModel.findOne({ _id: orderData.orderId, orderStatus: 'pending' });
+  if (!orderExist) return sendError(next, 'Order id not exist!', 400);
+
+  // --------------- Change orderStatus to `confirmed` and save the data ---------------
+  orderExist.orderStatus = 'confirmed';
+  const order = await orderExist.save();
+
+  res.status(200).json({ message: 'Order is confirmed successfully', order });
+};
+
+// ---------------  order ---------------
+export const cancelOrderPayment = async (req, res, next) => {
+  const { token } = req.query;
+
+  // --------------- Verfiy token if valid or not ---------------
+  const orderData = JWT.verify(token, process.env.ORDER_TOKEN_SECRET);
+
+  // --------------- Check if order id match order in database or not ---------------
+  const order = await orderModel.findOne({ _id: orderData.orderId, orderStatus: 'pending' });
+  if (!order) return sendError(next, 'Order id not exist!', 400);
+
+  // --------------- Change orderStatus to `canceled` and save the data ---------------
+  order.orderStatus = 'canceled';
+
+  // --------------- Return all quantity to products ---------------
+  const productsPromises = order?.products.map(async (product) => {
+    await productModel.findByIdAndUpdate(product.productId, {
+      $inc: { stock: parseInt(product.quantity, 10) },
+    });
+  });
+
+  await Promise.all(productsPromises);
+
+  // --------------- Undo usage count in coupon if user use coupon ---------------
+  if (order.couponId) {
+    const coupon = await couponModel.findById(order.couponId);
+
+    if (!coupon) return sendError(next, 'Coupon id not valid!', 400);
+
+    coupon.couponAssignToUsers.forEach((user) => {
+      if (user.userId.toString() === order.userId.toString()) {
+        user.usageCount -= 1;
+      }
+    });
+
+    await coupon.save();
+  }
+
+  await order.save();
+
+  res.status(200).json({ message: 'Order is canceled' });
 };

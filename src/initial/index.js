@@ -31,6 +31,7 @@ export default function initialProject(app) {
   app.use('/order', orderRoutes);
   app.use('/auth', authRoutes);
 
+  // Cron jobs
   changeStatusCoupon();
 
   // 404 ( Not Found )
