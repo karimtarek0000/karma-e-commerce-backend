@@ -12,6 +12,9 @@ export const isCouponValid = async ({ couponCode, userId, next }) => {
   if (coupon.couponStatus === 'expired' || moment(coupon.couponEndData).isBefore(moment())) {
     return sendError(next, 'Coupon expired', 400);
   }
+  if (coupon.couponStatus === 'valid' && moment().isBefore(coupon.couponStartDate)) {
+    return sendError(next, 'Coupon not started yet', 400);
+  }
 
   // --------- Check assign users --------------------
   const userExist = coupon.couponAssignToUsers.find(
