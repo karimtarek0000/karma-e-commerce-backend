@@ -1,5 +1,6 @@
 import fs from 'fs';
 import { nanoid } from 'nanoid';
+import Stripe from 'stripe';
 import { cartModel } from '../../../DB/models/Cart.model.js';
 import { orderModel } from '../../../DB/models/Order.model.js';
 import { productModel } from '../../../DB/models/Product.model.js';
@@ -7,6 +8,9 @@ import { sendError } from '../../lib/sendError.js';
 import { sendEmailService } from '../../services/sendEmail.js';
 import { isCouponValid } from '../../utils/couponValidations.js';
 import createInvoice from '../../utils/pdfkit.js';
+import { generateQrCode } from '../../utils/qrCode.js';
+import { generateToken } from '../../utils/useToken.js';
+import { paymentIntegration } from '../../services/payment.js';
 
 // --------------- Create order ---------------
 export const createOrder = async (req, res, next) => {
@@ -149,6 +153,61 @@ export const cartToOrder = async (req, res, next) => {
 
   if (!order) return sendError(next, 'Order faild', 400);
 
+  // ---- Payment ------
+  let orderSession = null;
+  if (order.paymentMethod === 'card') {
+    // ---------------- If coupon exist will create a coupon for stripe ----------------
+    if (couponResult?.coupon) {
+      const { couponAmount } = couponResult.coupon;
+      let coupon = null;
+
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+      // ------------- If coupon `percentage` -----------------
+      if (couponAmountType === 'percentage') {
+        coupon = await stripe.coupons.create({
+          percent_off: couponAmount,
+        });
+      }
+      // ------------- If coupon `fixed` -----------------
+      if (couponAmountType === 'fixed') {
+        coupon = await stripe.coupons.create({
+          amount_off: couponAmount * 100,
+          currency: 'EGP',
+        });
+      }
+
+      couponResult.coupon.couponId = coupon.id;
+    }
+
+    const token = generateToken({
+      payload: {
+        orderId: order._id,
+        userId: order.userId,
+      },
+      sign: process.env.ORDER_TOKEN_SECRET,
+      options: { expiresIn: '10m' },
+    });
+
+    orderSession = await paymentIntegration({
+      payment_method_types: ['card'],
+      mode: 'payment',
+      customer_email: email,
+      metadata: { orderId: order._id.toString() },
+      discounts: couponResult?.coupon ? [{ coupon: couponResult?.coupon?.couponId }] : [],
+      success_url: `${req.protocol}://${req.headers.host}/order/successOrder?token=${token}`,
+      cancel_url: `${req.protocol}://${req.headers.host}/order/cancelOrder?token=${token}`,
+      line_items: order?.products.map((product) => ({
+        price_data: {
+          currency: 'EGP',
+          product_data: { name: product.title },
+          unit_amount: product.price * 100,
+        },
+        quantity: product.quantity,
+      })),
+    });
+  }
+
   // ---- Increase usage count for coupon user ------
   if (couponResult?.coupon) {
     for (const user of couponResult.coupon.couponAssignToUsers || []) {
@@ -172,6 +231,12 @@ export const cartToOrder = async (req, res, next) => {
   cart.products = [];
   cart.subTotal = 0;
   await cart.save();
+
+  // ---- Generate qrCode ------
+  const orderQrCode = await generateQrCode({
+    id: order._id,
+    products: order.products,
+  });
 
   // ---- Generate invoice PDF ------
   const orderCode = `${userName}_${nanoid(5)}.pdf`;
@@ -197,5 +262,10 @@ export const cartToOrder = async (req, res, next) => {
   // ---------- Delete invoice after sended to email ----------
   fs.unlinkSync(`./Files/${orderCode}`);
 
-  res.status(201).json({ message: 'Cart converted to order successfully', order });
+  res.status(201).json({
+    message: 'Order successfully',
+    order,
+    orderQrCode,
+    checkOutURL: orderSession?.url,
+  });
 };
