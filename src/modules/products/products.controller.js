@@ -92,7 +92,7 @@ export const addNewProduct = async (req, res, next) => {
   }
 
   // Save all data in database
-  const priceAfterDiscount = discount ? price - (price * discount) / 100 : price;
+  const priceAfterDiscount = discount ? price - discount : price;
 
   const slug = slugify(title, '_');
 
