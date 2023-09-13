@@ -11,6 +11,7 @@ import {
   couponsRoutes,
   cartRoutes,
   orderRoutes,
+  reviewRoutes,
 } from './routes.all.js';
 import { changeStatusCoupon } from '../utils/crons.js';
 
@@ -29,6 +30,7 @@ export default function initialProject(app) {
   app.use('/coupons', couponsRoutes);
   app.use('/cart', cartRoutes);
   app.use('/order', orderRoutes);
+  app.use('/review', reviewRoutes);
   app.use('/auth', authRoutes);
 
   // Cron jobs
