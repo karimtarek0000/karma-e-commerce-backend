@@ -42,11 +42,20 @@ export const createOrder = async (req, res, next) => {
     finalPrice: productExist.priceAfterDiscount * quantity,
   };
 
-  // ---------- Calculate paid amount ---------------
+  // ---------- Calculate paid amount if coupon exist => `fixed` or `percentage` -----------
   const subTotal = productData.finalPrice;
   let paidAmount = subTotal;
   const couponAmountType = couponResult?.coupon.couponAmountType;
 
+  // ---- Make sure product.priceAfterDiscount greather than coupon.couponAmount -----
+  if (
+    couponAmountType === 'fixed' &&
+    couponResult?.coupon.couponAmount > productExist.priceAfterDiscount
+  ) {
+    return sendError(next, 'Coupon amount greather than product price', 400);
+  }
+
+  // ---- Set paidAmount depend on `fixed` or `percentage` -----
   if (couponAmountType) {
     if (couponAmountType === 'fixed') {
       paidAmount = subTotal - (couponResult?.coupon.couponAmount || 0);
@@ -68,7 +77,6 @@ export const createOrder = async (req, res, next) => {
     couponId: couponResult?.coupon._id ?? null,
     subTotal: productData.finalPrice,
   });
-
   if (!order) return sendError(next, 'Order faild', 400);
 
   // ---- Payment ------
@@ -148,12 +156,17 @@ export const createOrder = async (req, res, next) => {
     products: order.products,
   });
 
-  res.status(201).json({
+  const resData = {
     message: 'Created order successfully',
     order,
     orderQrCode,
-    checkOutURL: orderSession.url,
-  });
+  };
+
+  if (orderSession?.url) {
+    resData.checkOutURL = orderSession.url;
+  }
+
+  res.status(201).json(resData);
 };
 
 // --------------- Convert cart to order ---------------
@@ -330,12 +343,17 @@ export const cartToOrder = async (req, res, next) => {
   // ---------- Delete invoice after sended to email ----------
   fs.unlinkSync(`./Files/${orderCode}`);
 
-  res.status(201).json({
+  const resData = {
     message: 'Created order successfully',
     order,
     orderQrCode,
-    checkOutURL: orderSession?.url,
-  });
+  };
+
+  if (orderSession?.url) {
+    resData.checkOutURL = orderSession.url;
+  }
+
+  res.status(201).json(resData);
 };
 
 // --------------- Success order ---------------
