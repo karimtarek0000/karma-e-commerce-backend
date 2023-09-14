@@ -22,6 +22,11 @@ const productSchema = new Schema(
       default: 1,
       required: true,
     },
+    reviewRatings: {
+      type: Number,
+      min: 1,
+      max: 5,
+    },
     discount: {
       type: Number,
       default: 0,
@@ -91,7 +96,15 @@ const productSchema = new Schema(
   },
   {
     timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
+
+productSchema.virtual('reviews', {
+  ref: 'review',
+  foreignField: 'productId',
+  localField: '_id',
+});
 
 export const productModel = model('product', productSchema);

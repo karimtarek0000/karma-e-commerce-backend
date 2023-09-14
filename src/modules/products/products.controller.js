@@ -32,7 +32,11 @@ export const allProducts = async (req, res) => {
 export const getProduct = async (req, res, next) => {
   const { productId } = req.params;
 
-  const product = await productModel.findById(productId);
+  const product = await productModel.findById(productId).populate([
+    {
+      path: 'reviews',
+    },
+  ]);
 
   if (!product) return sendError(next, 'Product id not correct!', 400);
 
