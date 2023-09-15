@@ -6,14 +6,26 @@ import {
   cancelOrderPayment,
   cartToOrder,
   createOrder,
+  orderToDelivered,
   successOrderPayment,
 } from './order.controller.js';
-import { cartToOrderSchema, createOrderSchema, successOrderSchema } from './order.validation.js';
+import {
+  cartToOrderSchema,
+  createOrderSchema,
+  deliverSchema,
+  successOrderSchema,
+} from './order.validation.js';
 import { systemRoles } from '../../utils/systemRoles.js';
 
 const router = Router();
 
 router
+  .patch(
+    '/deliver/:orderId',
+    isAuth([systemRoles.ADMIN, systemRoles.SUPERADMIN]),
+    validationCore(deliverSchema),
+    errorHandler(orderToDelivered)
+  )
   .use(isAuth([systemRoles.USER]))
   .post('/', validationCore(createOrderSchema), errorHandler(createOrder))
   .post('/:cartId', validationCore(cartToOrderSchema), errorHandler(cartToOrder))

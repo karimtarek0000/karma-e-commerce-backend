@@ -356,7 +356,7 @@ export const cartToOrder = async (req, res, next) => {
   res.status(201).json(resData);
 };
 
-// --------------- Success order ---------------
+// --------------- Success order Payment ---------------
 export const successOrderPayment = async (req, res, next) => {
   const { token } = req.query;
 
@@ -374,7 +374,7 @@ export const successOrderPayment = async (req, res, next) => {
   res.status(200).json({ message: 'Order is confirmed successfully', order });
 };
 
-// ---------------  order ---------------
+// ---------------  Cancel order Payment ---------------
 export const cancelOrderPayment = async (req, res, next) => {
   const { token } = req.query;
 
@@ -415,4 +415,28 @@ export const cancelOrderPayment = async (req, res, next) => {
   await order.save();
 
   res.status(200).json({ message: 'Order is canceled' });
+};
+
+// ---------------  Convert order to `delivered` ---------------
+export const orderToDelivered = async (req, res, next) => {
+  const { orderId } = req.params;
+
+  const order = await orderModel.findOneAndUpdate(
+    {
+      _id: orderId,
+      orderStatus: { $nin: ['delivered', 'canceled', 'pending'] },
+    },
+    {
+      orderStatus: 'delivered',
+    },
+    {
+      new: true,
+    }
+  );
+
+  if (!order) {
+    return sendError(next, 'Order not exist!', 400);
+  }
+
+  res.status(200).json({ message: 'Has been converted order status to delivered', order });
 };

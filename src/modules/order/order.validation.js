@@ -36,3 +36,11 @@ export const successOrderSchema = {
     .required()
     .options({ presence: 'required' }),
 };
+
+export const deliverSchema = {
+  params: JOI.object({
+    orderId: generalValidations._id,
+  })
+    .required()
+    .options({ presence: 'required' }),
+};
