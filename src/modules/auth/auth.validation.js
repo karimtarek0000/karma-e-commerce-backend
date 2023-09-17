@@ -36,3 +36,9 @@ export const resetPasswordSchema = {
     .required()
     .options({ presence: 'required' }),
 };
+
+export const loginWithGoogleSchema = {
+  body: JOI.object({
+    idToken: JOI.string().required(),
+  }).required(),
+};

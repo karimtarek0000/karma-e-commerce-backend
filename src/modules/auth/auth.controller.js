@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import JWT from 'jsonwebtoken';
 import { nanoid } from 'nanoid';
+import { OAuth2Client } from 'google-auth-library';
 import { userModel } from '../../../DB/models/User.model.js';
 import { sendError } from '../../lib/sendError.js';
 import { generateToken } from '../../utils/useToken.js';
@@ -25,9 +26,7 @@ export const createNewUser = async (req, res, next) => {
       role,
     },
     sign: process.env.ACCESS_TOKEN_SECRET,
-    options: {
-      expiresIn: '1h',
-    },
+    options: {},
   });
 
   const confirmLink = `${req.protocol}://${req.headers.host}/auth/confirm/${token}`;
@@ -275,12 +274,136 @@ export const logOut = async (req, res, next) => {
 
   if (!jwtRefreshToken) return sendError(next, 'No content', 204);
 
-  // under middleware to verify exist token or not
-  // TODO: will update status and token in database
+  // --------- Clear cookie ----------
   res.clearCookie('jwtRefreshToken', {
     httpOnly: true,
     // secure: true, // For HTTPS
     // sameSite: "None", // For CORS
   });
-  res.status(204).json({ message: 'Logout successfully' });
+  res.status(200).json({ message: 'Logout successfully' });
+};
+
+export const loginWithGoogle = async (req, res, next) => {
+  const { idToken } = req.body;
+
+  // ------------------- Google to verfiy `idToken` -------------------
+  const client = new OAuth2Client();
+  async function verify() {
+    const ticket = await client.verifyIdToken({
+      idToken,
+      // Projects you can use like that ['proj-1', 'proj-2']
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+
+    return payload;
+  }
+
+  const { name, email, email_verified } = await verify();
+  if (!email_verified) return sendError(next, 'Email not verified', 400);
+
+  // ------------------- Check if email exist or not -------------------
+  const userExist = await userModel.findOne({
+    email,
+    provider: 'GOOGLE',
+  });
+
+  // ------------------- If user exist, login with google email -------------------
+  if (userExist) {
+    const { _id, isConfirmed, role } = userExist;
+
+    // ---- Create access token and refresh token ----
+    const payload = {
+      _id,
+      email,
+      name,
+      isConfirmed,
+      role,
+    };
+
+    const accessToken = generateToken({
+      payload,
+      sign: process.env.ACCESS_TOKEN_SECRET,
+      options: { expiresIn: '15m' },
+    });
+
+    const _refreshToken = generateToken({
+      payload,
+      sign: process.env.REFRESH_TOKE_SECRET,
+      options: { expiresIn: '10d' },
+    });
+
+    // ---- Adding refresh token in cookies ----
+    res.cookie('jwtRefreshToken', _refreshToken, {
+      httpOnly: true,
+      // secure: true, // For HTTPS
+      // sameSite: "None", // For CORS
+      maxAge: 10 * 24 * 60 * 60 * 1000,
+    });
+
+    // ---- Adding access token and update status ----
+    const user = await userModel
+      .findOneAndUpdate(
+        { email },
+        {
+          accessToken,
+          status: 'Online',
+        },
+        {
+          new: true,
+        }
+      )
+      .select('-password');
+
+    return res.status(200).json({ message: 'Login successfully', user });
+  }
+
+  // ----------------------- If user not exist, signup with new user data -----------------------
+  const newUser = await userModel.create({
+    name,
+    email,
+    password: nanoid(15),
+    isConfirmed: true,
+    phoneNumber: '',
+    provider: 'GOOGLE',
+  });
+
+  if (!newUser) return sendError(next, 'User signup faild, please try again', 400);
+
+  // ------ Generate `accessToken` and `refreshToken` after user signup -------
+  const { _id, isConfirmed, role } = newUser;
+  const payload = {
+    _id,
+    email,
+    name,
+    isConfirmed,
+    role,
+  };
+
+  const accessToken = generateToken({
+    payload,
+    sign: process.env.ACCESS_TOKEN_SECRET,
+    options: { expiresIn: '15m' },
+  });
+
+  const _refreshToken = generateToken({
+    payload,
+    sign: process.env.REFRESH_TOKE_SECRET,
+    options: { expiresIn: '10d' },
+  });
+
+  // ---- Adding refresh token in cookies ----
+  res.cookie('jwtRefreshToken', _refreshToken, {
+    httpOnly: true,
+    // secure: true, // For HTTPS
+    // sameSite: "None", // For CORS
+    maxAge: 10 * 24 * 60 * 60 * 1000,
+  });
+
+  newUser.accessToken = accessToken;
+  newUser.status = 'Online';
+
+  await newUser.save();
+
+  res.status(200).json({ message: 'Signup successfully', user: { ...newUser, accessToken } });
 };

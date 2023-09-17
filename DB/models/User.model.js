@@ -63,6 +63,11 @@ const userSchema = new Schema(
       default: false,
       required: true,
     },
+    provider: {
+      type: String,
+      default: 'System',
+      enum: ['System', 'GOOGLE', 'facebook'],
+    },
   },
   {
     timeseries: true,

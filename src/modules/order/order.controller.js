@@ -267,7 +267,7 @@ export const cartToOrder = async (req, res, next) => {
         userId: order.userId,
       },
       sign: process.env.ORDER_TOKEN_SECRET,
-      options: { expiresIn: '10m' },
+      options: {},
     });
 
     orderSession = await paymentIntegration({
