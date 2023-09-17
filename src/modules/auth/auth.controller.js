@@ -364,7 +364,7 @@ export const loginWithGoogle = async (req, res, next) => {
     email,
     password: nanoid(15),
     isConfirmed: true,
-    phoneNumber: '',
+    phoneNumber: '00000000',
     provider: 'GOOGLE',
   });
 
@@ -405,5 +405,5 @@ export const loginWithGoogle = async (req, res, next) => {
 
   await newUser.save();
 
-  res.status(200).json({ message: 'Signup successfully', user: { ...newUser, accessToken } });
+  res.status(200).json({ message: 'Login successfully', user: { ...newUser, accessToken } });
 };
