@@ -20,22 +20,14 @@ import {
 
 const router = Router();
 
-router.post('/', validationCore(newUserSchema), errorHandler(createNewUser));
-router.post(
-  '/login-with-google',
-  validationCore(loginWithGoogleSchema),
-  errorHandler(loginWithGoogle)
-);
-router.get('/confirm/:token', errorHandler(confirmEmail));
-router.get('/forget-password', errorHandler(forgetPassword));
-router.patch(
-  '/reset-password/:token',
-  validationCore(resetPasswordSchema),
-  errorHandler(resetPassword)
-);
-router.post('/sign-in', validationCore(signInSchema), errorHandler(signIn));
-
-router.get('/refresh-token', errorHandler(refreshToken));
-router.get('/logout', errorHandler(logOut));
+router
+  .post('/', validationCore(newUserSchema), errorHandler(createNewUser))
+  .post('/login-with-google', validationCore(loginWithGoogleSchema), errorHandler(loginWithGoogle))
+  .get('/confirm/:token', errorHandler(confirmEmail))
+  .post('/forget-password', errorHandler(forgetPassword))
+  .patch('/reset-password/:token', validationCore(resetPasswordSchema), errorHandler(resetPassword))
+  .post('/sign-in', validationCore(signInSchema), errorHandler(signIn))
+  .get('/refresh-token', errorHandler(refreshToken))
+  .get('/logout', errorHandler(logOut));
 
 export default router;
