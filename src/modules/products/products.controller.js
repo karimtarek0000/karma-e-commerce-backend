@@ -10,20 +10,30 @@ import { sendError } from '../../lib/sendError.js';
 
 // -------------- Get all products --------------
 export const allProducts = async (req, res) => {
-  const { mongooseQuery, limit, page } = new ApiFeatures(productModel.find(), req.query)
+  const { mongooseQueryCount, mongooseQuery, page, limit } = new ApiFeatures(
+    productModel.count(),
+    productModel.find(),
+    req.query
+  )
     .pagination()
     .sort()
     .select()
     .filter()
-    .search();
+    .search()
+    .totalCount();
 
   const products = await mongooseQuery;
+  const totalCountProducts = await mongooseQueryCount;
 
   res.status(200).json({
     message: 'All products',
-    page,
-    limit,
-    countOfProducts: products.length,
+    metaData: {
+      page,
+      limit,
+      totalCountProducts,
+      countOfProducts: products.length,
+      totalOfPages: Math.ceil(totalCountProducts / limit),
+    },
     products,
   });
 };

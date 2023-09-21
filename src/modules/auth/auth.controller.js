@@ -167,7 +167,8 @@ export const forgetPassword = async (req, res, next) => {
   });
 
   // ---- Send email to user ----
-  const confirmLink = `${req.protocol}://${req.headers.host}/auth/reset-password/${token}`;
+  // const confirmLink = `${req.protocol}://${req.headers.host}/auth/reset-password?token=${token}`;
+  const confirmLink = `${req.headers.origin}/auth/reset-password?token=${token}`;
 
   const forgetPasswordLink = sendEmailService({
     to: email,

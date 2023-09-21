@@ -1,7 +1,8 @@
 import { paginationHandler } from '../utils/pagination.js';
 
 export class ApiFeatures {
-  constructor(mongooseQuery, queryParams) {
+  constructor(mongooseQueryCount, mongooseQuery, queryParams) {
+    this.mongooseQueryCount = mongooseQueryCount;
     this.mongooseQuery = mongooseQuery;
     this.queryParams = queryParams;
   }
@@ -35,7 +36,7 @@ export class ApiFeatures {
   search() {
     const searchQuery = this.queryParams?.search;
 
-    this.mongooseQuery.find({
+    this.querySearch = {
       $or: [
         {
           title: { $regex: searchQuery ?? '', $options: 'i' },
@@ -44,7 +45,9 @@ export class ApiFeatures {
           description: { $regex: searchQuery ?? '', $options: 'i' },
         },
       ],
-    });
+    };
+
+    this.mongooseQuery.find(this.querySearch);
 
     return this;
   }
@@ -57,14 +60,19 @@ export class ApiFeatures {
     excludeKeys.forEach((key) => delete queries[key]);
 
     // -------- Convert req.query to string to make add $ before operator --------
-    const query = JSON.parse(
-      JSON.stringify(queries).replace(
-        /gt|gte|lt|lte|in|nin|eq/g,
-        (operator) => `$${operator}`
-      )
+    this.queryFilter = JSON.parse(
+      JSON.stringify(queries).replace(/gt|gte|lt|lte|in|nin|eq/g, (operator) => `$${operator}`)
     );
 
-    this.mongooseQuery.find(query);
+    this.mongooseQuery.find(this.queryFilter);
+
+    return this;
+  }
+
+  // ------------ Total count -----------------
+  totalCount() {
+    this.mongooseQueryCount.count({ ...this.querySearch, ...this.queryFilter });
+
     return this;
   }
 }

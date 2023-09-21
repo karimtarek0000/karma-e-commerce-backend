@@ -11,6 +11,7 @@ import { ApiFeatures } from '../../lib/apiFeatures.js';
 // ------ Get all categories --------
 export const getAllCategories = async (req, res) => {
   const { mongooseQuery } = new ApiFeatures(
+    categoryModel.count(),
     categoryModel.find().populate([
       {
         path: 'subCategories',
