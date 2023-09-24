@@ -65,6 +65,17 @@ export const addProductInCart = async (req, res, next) => {
   res.status(201).json({ message: 'New cart created successfully', newCart });
 };
 
+// --------------- Get cart for user ---------------
+export const getCart = async (req, res, next) => {
+  const userId = req.userData._id;
+
+  const cart = await cartModel.findOne({ userId });
+
+  if (!cart) return sendError(next, 'No cart exist!', 400);
+
+  res.status(200).json({ message: 'Cart', cart });
+};
+
 // --------------- Delete product from cart ---------------
 export const deleteProductFromCart = async (req, res, next) => {
   const userId = req.userData._id;
