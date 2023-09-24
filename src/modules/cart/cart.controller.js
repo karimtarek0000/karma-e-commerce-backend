@@ -69,7 +69,7 @@ export const addProductInCart = async (req, res, next) => {
 export const getCart = async (req, res, next) => {
   const userId = req.userData._id;
 
-  const cart = await cartModel.findOne({ userId });
+  const cart = await cartModel.findOne({ userId }).populate([{ path: 'products.productId' }]);
 
   if (!cart) return sendError(next, 'No cart exist!', 400);
 
