@@ -102,9 +102,11 @@ export const deleteProductFromCart = async (req, res, next) => {
   });
 
   // ----------- Save all updates in database ----------------
-  const updateCart = await cart.save();
+  const updateCart = await cart
+    .save()
+    .then((data) => data.populate([{ path: 'products.productId' }]));
 
   if (!updateCart) return sendError(next, 'Delete product faild', 400);
 
-  res.status(200).json({ message: 'Product deleted successfully', updateCart });
+  res.status(200).json({ message: 'Product deleted successfully', cart: updateCart });
 };
