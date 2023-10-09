@@ -121,8 +121,8 @@ export const createOrder = async (req, res, next) => {
       customer_email: email,
       metadata: { orderId: order._id.toString() },
       discounts: couponResult?.coupon ? [{ coupon: couponResult?.coupon?.couponId }] : [],
-      success_url: `${process.env.CLIENT_URL}/order/successOrder?token=${token}`,
-      cancel_url: `${process.env.CLIENT_URL}/order/cancelOrder?token=${token}`,
+      success_url: `${process.env.CLIENT_URL}/payment/success?token=${token}`,
+      cancel_url: `${process.env.CLIENT_URL}/payment/cancel?token=${token}`,
       line_items: order?.products.map((product) => ({
         price_data: {
           currency: 'EGP',
@@ -277,7 +277,7 @@ export const cartToOrder = async (req, res, next) => {
       metadata: { orderId: order._id.toString() },
       discounts: couponResult?.coupon ? [{ coupon: couponResult?.coupon?.couponId }] : [],
       success_url: `${process.env.CLIENT_URL}/payment/success?token=${token}`,
-      cancel_url: `${process.env.CLIENT_URL}/payment/cancled?token=${token}`,
+      cancel_url: `${process.env.CLIENT_URL}/payment/cancel?token=${token}`,
       line_items: order?.products.map((product) => ({
         price_data: {
           currency: 'EGP',
