@@ -6,6 +6,7 @@ import {
   cancelOrderPayment,
   cartToOrder,
   createOrder,
+  getAllOrders,
   orderToDelivered,
   successOrderPayment,
 } from './order.controller.js';
@@ -30,6 +31,7 @@ router
   .post('/', validationCore(createOrderSchema), errorHandler(createOrder))
   .post('/:cartId', validationCore(cartToOrderSchema), errorHandler(cartToOrder))
   .patch('/successOrder', validationCore(successOrderSchema), errorHandler(successOrderPayment))
-  .patch('/cancelOrder', validationCore(successOrderSchema), errorHandler(cancelOrderPayment));
+  .patch('/cancelOrder', validationCore(successOrderSchema), errorHandler(cancelOrderPayment))
+  .get('/', errorHandler(getAllOrders));
 
 export default router;

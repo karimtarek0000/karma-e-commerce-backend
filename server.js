@@ -12,7 +12,7 @@ const app = express();
 // Cors
 // TODO: will remove it just development
 const corsOptions = {
-  origin: 'http://localhost:3001',
+  origin: process.env.CLIENT_URL,
   credentials: true,
   optionsSuccessStatus: 200,
 };
