@@ -48,6 +48,7 @@ export const createCoupon = async (req, res, next) => {
   res.status(201).json({ message: 'Create new coupon', newCoupon });
 };
 
+// --------- Check coupon ------------
 export const checkCoupon = async (req, res, next) => {
   const { couponCode } = req.body;
   const { _id: userId } = req.userData;
