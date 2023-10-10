@@ -1,6 +1,7 @@
 import { couponModel } from '../../../DB/models/Coupon.model.js';
 import { userModel } from '../../../DB/models/User.model.js';
 import { sendError } from '../../lib/sendError.js';
+import { isCouponValid } from '../../utils/couponValidations.js';
 
 // --------- Create new coupon ----------
 export const createCoupon = async (req, res, next) => {
@@ -45,6 +46,17 @@ export const createCoupon = async (req, res, next) => {
   if (!newCoupon) return sendError(next, 'Create coupon faild', 400);
 
   res.status(201).json({ message: 'Create new coupon', newCoupon });
+};
+
+export const checkCoupon = async (req, res, next) => {
+  const { couponCode } = req.body;
+  const { _id: userId } = req.userData;
+
+  const couponResult = await isCouponValid({ couponCode, userId, next });
+
+  const { couponAmountType, couponAmount } = couponResult.coupon;
+
+  res.status(200).json({ message: 'Check coupon', coupon: { couponAmountType, couponAmount } });
 };
 
 // --------- Delete coupon ----------
