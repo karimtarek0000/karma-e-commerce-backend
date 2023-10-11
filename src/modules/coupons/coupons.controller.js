@@ -55,6 +55,8 @@ export const checkCoupon = async (req, res, next) => {
 
   const couponResult = await isCouponValid({ couponCode, userId, next });
 
+  if (!couponResult?.status) return couponResult;
+
   const { couponAmountType, couponAmount } = couponResult.coupon;
 
   res.status(200).json({ message: 'Check coupon', coupon: { couponAmountType, couponAmount } });
