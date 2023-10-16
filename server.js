@@ -10,13 +10,11 @@ config();
 const app = express();
 
 // Cors
-// TODO: will remove it just development
 const corsOptions = {
   origin: process.env.CLIENT_URL,
   credentials: true,
   optionsSuccessStatus: 200,
 };
-
 app.use(cors(corsOptions));
 
 // Middleware for body parsing
