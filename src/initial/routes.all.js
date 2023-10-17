@@ -7,6 +7,7 @@ import couponsRoutes from '../modules/coupons/coupons.routes.js';
 import cartRoutes from '../modules/cart/cart.routes.js';
 import orderRoutes from '../modules/order/order.routes.js';
 import reviewRoutes from '../modules/review/review.routes.js';
+import homeRoutes from '../modules/home/home.routes.js';
 
 export {
   authRoutes,
@@ -18,4 +19,5 @@ export {
   cartRoutes,
   orderRoutes,
   reviewRoutes,
+  homeRoutes,
 };

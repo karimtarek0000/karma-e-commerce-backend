@@ -2,18 +2,19 @@ import cookieParser from 'cookie-parser';
 import { dbConnection } from '../../DB/connection.js';
 
 // Routes
+import { changeStatusCoupon } from '../utils/crons.js';
 import {
   authRoutes,
-  categoriesRoutes,
-  subCategoriesRoutes,
   brandsRoutes,
-  productsRoutes,
-  couponsRoutes,
   cartRoutes,
+  categoriesRoutes,
+  couponsRoutes,
+  homeRoutes,
   orderRoutes,
+  productsRoutes,
   reviewRoutes,
+  subCategoriesRoutes,
 } from './routes.all.js';
-import { changeStatusCoupon } from '../utils/crons.js';
 
 export default function initialProject(app) {
   // Middleware for cookies parsing
@@ -31,6 +32,7 @@ export default function initialProject(app) {
   app.use('/cart', cartRoutes);
   app.use('/order', orderRoutes);
   app.use('/review', reviewRoutes);
+  app.use('/home', homeRoutes);
   app.use('/auth', authRoutes);
 
   // Cron jobs
