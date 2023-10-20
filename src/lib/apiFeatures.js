@@ -61,7 +61,7 @@ export class ApiFeatures {
 
     // -------- Convert req.query to string to make add $ before operator --------
     this.queryFilter = JSON.parse(
-      JSON.stringify(queries).replace(/gt|gte|lt|lte|in|nin|eq/g, (operator) => `$${operator}`)
+      JSON.stringify(queries).replace(/\b(gt|gte|lt|lte|in|nin|eq)/g, (operator) => `$${operator}`)
     );
 
     this.mongooseQuery.find(this.queryFilter);
