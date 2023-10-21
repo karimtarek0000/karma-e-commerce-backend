@@ -1,12 +1,12 @@
 import bcrypt from 'bcrypt';
+import { OAuth2Client } from 'google-auth-library';
 import JWT from 'jsonwebtoken';
 import { nanoid } from 'nanoid';
-import { OAuth2Client } from 'google-auth-library';
 import { userModel } from '../../../DB/models/User.model.js';
 import { sendError } from '../../lib/sendError.js';
-import { generateToken } from '../../utils/useToken.js';
 import { sendEmailService } from '../../services/sendEmail.js';
 import { emailTemplate } from '../../utils/template.email.js';
+import { generateToken } from '../../utils/useToken.js';
 
 export const createNewUser = async (req, res, next) => {
   const { name, email, phoneNumber, password, role } = req.body;
@@ -23,13 +23,15 @@ export const createNewUser = async (req, res, next) => {
     payload: {
       name,
       email,
+      phoneNumber,
+      password,
       role,
     },
     sign: process.env.ACCESS_TOKEN_SECRET,
-    options: {},
+    options: { expiresIn: '30m' },
   });
 
-  const confirmLink = `${req.protocol}://${req.headers.host}/auth/confirm/${token}`;
+  const confirmLink = `${process.env.CLIENT_URL}/auth/confirm-email/${token}`;
 
   const confirmLinkStatus = sendEmailService({
     to: email,
@@ -44,24 +46,8 @@ export const createNewUser = async (req, res, next) => {
     return sendError(next, 'Error when send to you confirm link email', 400);
   }
 
-  // ---- Save the user data in database ------
-  const data = await userModel.create({
-    name,
-    email,
-    phoneNumber,
-    role,
-    password,
-  });
-
-  if (!data) return sendError(next, 'Error saving data in our database', 400);
-
-  res.status(201).json({
-    message: 'User created and has been send confirm link to verify your email',
-    user: {
-      name: data.name,
-      email: data.email,
-      role: data.role,
-    },
+  res.status(200).json({
+    message: 'Has been sended email to you for confirm email 👋',
   });
 };
 
@@ -70,18 +56,26 @@ export const confirmEmail = async (req, res, next) => {
 
   // ------- Verify token -------
   const decoded = JWT.verify(token, process.env.ACCESS_TOKEN_SECRET);
-
   if (!decoded.email) return sendError(next, 'Token not valid', 400);
 
-  // ------- Check if user exist or not -------
-  const user = await userModel.findOneAndUpdate(
-    { email: decoded.email, isConfirmed: false },
-    { isConfirmed: true }
-  );
+  const { name, email, phoneNumber, role, password } = decoded;
 
-  if (!user) return sendError(next, 'User not found', 400);
+  // ---------- For more scurity will check email exist or not -------------
+  const userExist = await userModel.findOne({ email });
+  if (userExist) return sendError(next, 'User already exists', 400);
 
-  res.status(200).json({ message: 'Confirmed email successfully' });
+  // ------- Save data in database -------
+  const userData = await userModel.create({
+    name,
+    email,
+    phoneNumber,
+    role,
+    password,
+    isConfirmed: true,
+  });
+  if (!userData) return sendError(next, 'Faild for sign up', 400);
+
+  res.status(201).json({ message: 'Sign up successfully 👋' });
 };
 
 export const signIn = async (req, res, next) => {
