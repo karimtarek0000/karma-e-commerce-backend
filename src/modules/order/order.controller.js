@@ -343,7 +343,7 @@ export const cartToOrder = async (req, res, next) => {
   fs.unlinkSync(`./FilesPDF/${orderCode}`);
 
   const resData = {
-    message: 'Created order successfully',
+    message: 'Created order successfully, invoice PDF sended to your email',
     order,
     orderQrCode,
   };
@@ -377,7 +377,7 @@ export const successOrderPayment = async (req, res, next) => {
   });
 
   const resData = {
-    message: 'Order is confirmed successfully',
+    message: 'Order is confirmed successfully, invoice PDF sended to your email',
     order,
     orderQrCode,
   };

@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import { errorHandler } from '../../lib/errorHandler.js';
-import { validationCore } from '../../middlewares/validations.js';
 import { isAuth } from '../../middlewares/auth.js';
+import { validationCore } from '../../middlewares/validations.js';
+import { systemRoles } from '../../utils/systemRoles.js';
 import {
   cancelOrderPayment,
   cartToOrder,
@@ -16,7 +17,6 @@ import {
   deliverSchema,
   successOrderSchema,
 } from './order.validation.js';
-import { systemRoles } from '../../utils/systemRoles.js';
 
 const router = Router();
 
@@ -27,7 +27,7 @@ router
     validationCore(deliverSchema),
     errorHandler(orderToDelivered)
   )
-  .use(isAuth([systemRoles.USER]))
+  .use(isAuth([systemRoles.USER, systemRoles.ADMIN, systemRoles.SUPERADMIN]))
   .post('/', validationCore(createOrderSchema), errorHandler(createOrder))
   .post('/:cartId', validationCore(cartToOrderSchema), errorHandler(cartToOrder))
   .patch('/successOrder', validationCore(successOrderSchema), errorHandler(successOrderPayment))
