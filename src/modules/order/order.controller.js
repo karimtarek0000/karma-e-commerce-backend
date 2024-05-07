@@ -370,7 +370,19 @@ export const successOrderPayment = async (req, res, next) => {
   orderExist.orderStatus = 'confirmed';
   const order = await orderExist.save();
 
-  res.status(200).json({ message: 'Order is confirmed successfully', order });
+  // ---- Generate qrCode ------
+  const orderQrCode = await generateQrCode({
+    id: order._id,
+    products: order.products,
+  });
+
+  const resData = {
+    message: 'Order is confirmed successfully',
+    order,
+    orderQrCode,
+  };
+
+  res.status(200).json(resData);
 };
 
 // ---------------  Cancel order Payment ---------------
