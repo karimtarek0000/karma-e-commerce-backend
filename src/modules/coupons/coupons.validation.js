@@ -9,13 +9,13 @@ export const createCouponSchema = {
     couponStatus: JOI.string().valid('expired', 'valid').optional(),
     couponStartDate: JOI.date().greater(Date.now() - 24 * 60 * 60 * 1000),
     couponEndData: JOI.date().greater(JOI.ref('couponStartDate')),
-    couponAssignToUsers: JOI.array().items({
-      userId: generalValidations._id,
-      maxUsage: JOI.number().default(1).optional(),
-    }),
-  })
-    .required()
-    .options({ presence: 'required' }),
+    couponAssignToUsers: JOI.array()
+      .items({
+        userId: generalValidations._id,
+        maxUsage: JOI.number().default(1).optional(),
+      })
+      .optional(),
+  }).options({ presence: 'required' }),
 };
 
 export const deleteCouponSchema = {

@@ -21,18 +21,20 @@ export const isCouponValid = async ({ couponCode, userId, next }) => {
   }
 
   // --------- Check assign users --------------------
-  const userExist = coupon.couponAssignToUsers.find(
-    (user) => user.userId.toString() === userId.toString()
-  );
+  if (coupon.couponAssignToUsers?.length) {
+    const userExist = coupon.couponAssignToUsers.find(
+      (user) => user.userId.toString() === userId.toString()
+    );
 
-  // ------------ If user not assigned --------------
-  if (!userExist) {
-    return sendError(next, 'This user not assigned to this coupon', 400);
-  }
+    // ------------ If user not assigned --------------
+    if (!userExist) {
+      return sendError(next, 'This user not assigned to this coupon', 400);
+    }
 
-  // ------------ If user exceeded max usage --------------
-  if (userExist.usageCount === userExist.maxUsage) {
-    return sendError(next, 'Exceeded max usage for this coupon', 400);
+    // ------------ If user exceeded max usage --------------
+    if (userExist.usageCount === userExist.maxUsage) {
+      return sendError(next, 'Exceeded max usage for this coupon', 400);
+    }
   }
 
   return { status: true, coupon };

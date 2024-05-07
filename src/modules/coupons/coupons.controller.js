@@ -20,16 +20,19 @@ export const createCoupon = async (req, res, next) => {
   if (coupon) return sendError(next, 'Coupon already exist', 400);
 
   // --------- Check if users valid or not ---------
-  const allUsersIds = couponAssignToUsers.map((user) => user?.userId);
+  // ** If couponAssignToUsers length grather than 0, check if all users exist
+  if (couponAssignToUsers?.length) {
+    const allUsersIds = couponAssignToUsers.map((user) => user?.userId);
 
-  const allUsersExist = await userModel.find({
-    _id: {
-      $in: allUsersIds,
-    },
-  });
+    const allUsersExist = await userModel.find({
+      _id: {
+        $in: allUsersIds,
+      },
+    });
 
-  if (allUsersExist.length !== allUsersIds.length) {
-    return sendError(next, 'Some users in array not exist!', 400);
+    if (allUsersExist.length !== allUsersIds.length) {
+      return sendError(next, 'Some users in array not exist!', 400);
+    }
   }
 
   // --------- Finally create new coupon ---------
