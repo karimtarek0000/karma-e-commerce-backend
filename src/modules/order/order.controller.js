@@ -336,11 +336,11 @@ export const cartToOrder = async (req, res, next) => {
     to: email,
     subject: 'Order confirmation',
     message: 'Please find your invoice order pdf below',
-    attachments: [{ path: `./Files/${orderCode}` }],
+    attachments: [{ path: `./FilesPDF/${orderCode}` }],
   });
 
   // ---------- Delete invoice after sended to email ----------
-  fs.unlinkSync(`./Files/${orderCode}`);
+  fs.unlinkSync(`./FilesPDF/${orderCode}`);
 
   const resData = {
     message: 'Created order successfully',

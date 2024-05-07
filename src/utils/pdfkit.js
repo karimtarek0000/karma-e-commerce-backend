@@ -11,7 +11,7 @@ function createInvoice(invoice, pathVar) {
   generateFooter(doc);
 
   doc.end();
-  doc.pipe(fs.createWriteStream(path.resolve(`./Files/${pathVar}`)));
+  doc.pipe(fs.createWriteStream(path.resolve(`./FilesPDF/${pathVar}`)));
 }
 
 function generateHeader(doc) {
