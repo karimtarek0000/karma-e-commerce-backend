@@ -1,18 +1,18 @@
 import fs from 'fs';
-import { nanoid } from 'nanoid';
 import JWT from 'jsonwebtoken';
+import { nanoid } from 'nanoid';
 import Stripe from 'stripe';
 import { cartModel } from '../../../DB/models/Cart.model.js';
+import { couponModel } from '../../../DB/models/Coupon.model.js';
 import { orderModel } from '../../../DB/models/Order.model.js';
 import { productModel } from '../../../DB/models/Product.model.js';
 import { sendError } from '../../lib/sendError.js';
+import { paymentIntegration } from '../../services/payment.js';
 import { sendEmailService } from '../../services/sendEmail.js';
 import { isCouponValid } from '../../utils/couponValidations.js';
 import createInvoice from '../../utils/pdfkit.js';
 import { generateQrCode } from '../../utils/qrCode.js';
 import { generateToken } from '../../utils/useToken.js';
-import { paymentIntegration } from '../../services/payment.js';
-import { couponModel } from '../../../DB/models/Coupon.model.js';
 
 // --------------- Create order ---------------
 export const createOrder = async (req, res, next) => {
@@ -329,7 +329,6 @@ export const cartToOrder = async (req, res, next) => {
     date: order.createdAt,
     shipping: { name: userName, address, city: 'cairo', country: 'Egypt' },
   };
-
   createInvoice(invoice, orderCode);
 
   // ---- Send invoice PDF to user via his email ------
