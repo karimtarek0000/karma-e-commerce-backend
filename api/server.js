@@ -17,7 +17,7 @@ const app = express();
 // };
 
 const corsOptions = {
-  origin: "https://karma-e-commerce-mla4az8ux-karimtarek0000s-projects.vercel.app/",
+  origin: "https://karma-e-commerce-mla4az8ux-karimtarek0000s-projects.vercel.app",
   credentials: true,
   optionsSuccessStatus: 200,
 };
