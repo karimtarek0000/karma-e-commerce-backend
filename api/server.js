@@ -10,12 +10,12 @@ config();
 const app = express();
 
 // Cors
-const corsOptions = {
-  origin: process.env.CLIENT_URL,
-  credentials: true,
-  optionsSuccessStatus: 200,
-};
-app.use(cors(corsOptions));
+// const corsOptions = {
+//   origin: process.env.CLIENT_URL,
+//   credentials: true,
+//   optionsSuccessStatus: 200,
+// };
+app.use(cors());
 
 // Middleware for body parsing
 app.use(express.json());
