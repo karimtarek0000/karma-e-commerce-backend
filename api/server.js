@@ -10,14 +10,8 @@ config();
 const app = express();
 
 // Cors
-// const corsOptions = {
-//   origin: process.env.CLIENT_URL,
-//   credentials: true,
-//   optionsSuccessStatus: 200,
-// };
-
 const corsOptions = {
-  origin: "https://karma-e-commerce-mla4az8ux-karimtarek0000s-projects.vercel.app",
+  origin: process.env.CLIENT_URL,
   credentials: true,
   optionsSuccessStatus: 200,
 };
