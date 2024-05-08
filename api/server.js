@@ -15,7 +15,13 @@ const app = express();
 //   credentials: true,
 //   optionsSuccessStatus: 200,
 // };
-app.use(cors());
+
+const corsOptions = {
+  origin: "https://karma-e-commerce-mla4az8ux-karimtarek0000s-projects.vercel.app/",
+  credentials: true,
+  optionsSuccessStatus: 200,
+};
+app.use(cors(corsOptions));
 
 // Middleware for body parsing
 app.use(express.json());
