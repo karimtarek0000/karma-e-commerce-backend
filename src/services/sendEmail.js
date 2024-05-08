@@ -1,11 +1,6 @@
 import nodemailer from 'nodemailer';
 
-export async function sendEmailService({
-  to,
-  subject,
-  message,
-  attachments = [],
-} = {}) {
+export async function sendEmailService({ to, subject, message, attachments = [] } = {}) {
   const transporter = nodemailer.createTransport({
     host: 'localhost',
     port: 587, // 587 => not secure || 465 => secure that depend on ( secure ) ATTRIBUTE
@@ -13,7 +8,7 @@ export async function sendEmailService({
     service: 'gmail',
     auth: {
       user: 'hjjsh78jjudi@gmail.com',
-      pass: 'ryozhgcbxrtsxgvb',
+      pass: 'crgupcejxbmjdzsp',
     },
   });
 
