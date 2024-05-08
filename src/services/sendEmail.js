@@ -3,8 +3,8 @@ import nodemailer from 'nodemailer';
 export async function sendEmailService({ to, subject, message, attachments = [] } = {}) {
   const transporter = nodemailer.createTransport({
     host: 'localhost',
-    port: 587, // 587 => not secure || 465 => secure that depend on ( secure ) ATTRIBUTE
-    secure: false, // ssl(tls)
+    port: 465, // 587 => not secure || 465 => secure that depend on ( secure ) ATTRIBUTE
+    secure: true, // ssl(tls)
     service: 'gmail',
     auth: {
       user: 'hjjsh78jjudi@gmail.com',
