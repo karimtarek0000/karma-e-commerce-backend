@@ -300,10 +300,7 @@ export const loginWithGoogle = async (req, res, next) => {
   if (!email_verified) return sendError(next, 'Email not verified', 400);
 
   // ------------------- Check if email exist or not -------------------
-  const userExist = await userModel.findOne({
-    email,
-    provider: 'GOOGLE',
-  });
+  const userExist = await userModel.findOne({ email });
 
   // ------------------- If user exist, login with google email -------------------
   if (userExist) {
@@ -333,6 +330,8 @@ export const loginWithGoogle = async (req, res, next) => {
     // ---- Adding refresh token in cookies ----
     res.cookie('jwtRefreshToken', _refreshToken, {
       httpOnly: true,
+      secure: process.env.ENVIRONMENT !== 'development',
+      sameSite: process.env.ENVIRONMENT === 'production' ? 'none' : 'lax',
       // secure: true, // For HTTPS
       // sameSite: "None", // For CORS
       maxAge: 10 * 24 * 60 * 60 * 1000,
