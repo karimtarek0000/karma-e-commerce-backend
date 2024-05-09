@@ -119,6 +119,8 @@ export const signIn = async (req, res, next) => {
   // ---- Adding refresh token in cookies ----
   res.cookie('jwtRefreshToken', refreshToken, {
     httpOnly: true,
+    secure: process.env.ENVIRONMENT !== 'development',
+    sameSite: process.env.ENVIRONMENT === 'production' ? 'none' : 'lax',
     // secure: true, // For HTTPS
     // sameSite: "None", // For CORS
     maxAge: 10 * 24 * 60 * 60 * 1000,
