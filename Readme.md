@@ -260,10 +260,6 @@ karma-e-commerce-backend/
 
 The project includes a `vercel.json` configuration file for easy deployment on Vercel.
 
-## ⚖️ License
-
-This project is licensed under the ISC License.
-
 ## 👨‍💻 Author
 
-Karma E-Commerce Team
+karim tarek
