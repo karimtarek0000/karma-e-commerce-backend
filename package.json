@@ -10,7 +10,7 @@
     "node": "20.11.1"
   },
   "scripts": {
-    "build": "node api/server.js",
+    "start": "node api/server.js",
     "dev": "nodemon api/server.js"
   },
   "dependencies": {
